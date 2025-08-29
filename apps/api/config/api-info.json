@@ -1,12 +1,12 @@
 {
   "name": "Aprove-me API",
-  "description": "API para gerenciamento de recebíveis e cedentes",
-  "version": "1.0.0",
-  "author": "Bankme",
+  "description": "API para gerenciamento de recebíveis e cedentes com autenticação JWT",
+  "version": "1.4.1",
+  "author": "Evandro Gromann",
   "contact": {
-    "name": "Equipe Bankme",
-    "email": "contato@bankme.com.br",
-    "url": "https://bankme.tech"
+    "name": "Evandro Gromann",
+    "email": "evandro@example.com",
+    "url": "https://github.com/EvandroGromann"
   },
   "license": {
     "name": "MIT",

@@ -1,12 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { AssignorsService } from './assignors.service';
 import { CreateAssignorDto } from './dto/create-assignor.dto';
 import { UpdateAssignorDto } from './dto/update-assignor.dto';
 import { AssignorResponseDto } from './dto/assignor-response.dto';
+import { JwtAuthGuard } from '../../shared/auth/guards/jwt-auth.guard';
 
 @ApiTags('assignors')
 @Controller('integrations')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT-auth')
 export class AssignorsController {
   constructor(private readonly assignorsService: AssignorsService) {}
 

@@ -1,14 +1,11 @@
-// Setup global test configuration
 import { PrismaClient } from '@prisma/client';
 
-// Configurar timeout global
 jest.setTimeout(10000);
 
-// Mock do PrismaClient para testes
 jest.mock('@prisma/client', () => ({
   PrismaClient: jest.fn().mockImplementation(() => ({
-    $connect: jest.fn(),
-    $disconnect: jest.fn(),
+    $connect: jest.fn().mockResolvedValue(undefined),
+    $disconnect: jest.fn().mockResolvedValue(undefined),
     assignor: {
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -25,7 +22,6 @@ jest.mock('@prisma/client', () => ({
   })),
 }));
 
-// Limpar mocks entre testes
 beforeEach(() => {
   jest.clearAllMocks();
 });

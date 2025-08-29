@@ -1,8 +1,8 @@
 # Aprove-me - Sistema de Gestão de Pagáveis
 
 ![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
-![Unit Tests](https://img.shields.io/badge/unit%20tests-70%20passing-brightgreen)
-![E2E Tests](https://img.shields.io/badge/e2e%20tests-29%20passing-brightgreen)
+![Unit Tests](https://img.shields.io/badge/unit%20tests-89%20passing-brightgreen)
+![E2E Tests](https://img.shields.io/badge/e2e%20tests-47%20passing-brightgreen)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
 ![NestJS](https://img.shields.io/badge/NestJS-10.0-red)
 ![Prisma](https://img.shields.io/badge/Prisma-5.0-2D3748)
@@ -18,6 +18,7 @@ Sistema robusto para gestão de pagáveis financeiros que permite operações co
 ### ✨ Funcionalidades Implementadas
 
 - ✅ **API REST completa** com validação rigorosa
+- ✅ **Autenticação JWT** com expiração de 1 minuto
 - ✅ **Documentação Swagger/OpenAPI** interativa
 - ✅ **Soft Delete** para cedentes 
 - ✅ **Paginação** em consultas de listagem
@@ -34,10 +35,13 @@ O projeto segue princípios de **Domain-Driven Design (DDD)** e **Clean Architec
 apps/
 ├── api/                 # Backend API
 │   └── src/
-│       ├── core/        # Configurações centrais
 │       ├── modules/     # Módulos de domínio
+│       │   ├── auth/         # Autenticação JWT
 │       │   ├── assignors/    # Domínio do Cedente  
-│       │   └── payables/    # Domínio do Pagável
+│       │   └── payables/     # Domínio do Pagável
+│       ├── shared/      # Componentes compartilhados
+│       │   ├── auth/         # Guards e estratégias JWT
+│       │   └── database/     # Configuração do Prisma
 │       └── main.ts
 └── web/                 # Frontend (implementação futura)
 ```
@@ -49,6 +53,8 @@ apps/
 - **TypeScript** - Linguagem principal com tipagem estática
 - **Prisma** - ORM moderno para banco de dados
 - **SQLite** - Banco de dados para desenvolvimento
+- **JWT** - Tokens de autenticação com expiração controlada
+- **Passport** - Middleware de autenticação robusto
 - **Class Validator** - Validação robusta de DTOs
 - **Swagger/OpenAPI** - Documentação interativa da API
 - **Jest** - Framework de testes com 100% de cobertura
@@ -106,16 +112,48 @@ npm run test:all
 
 A API estará disponível em:
 - **Aplicação**: `http://localhost:3000`
-- **Documentação Swagger**: `http://localhost:3000/api-docs`
+- **Documentação Swagger**: `http://localhost:3000/api/docs`
+
+### 🔐 Como usar a autenticação
+
+1. **Obter token JWT:**
+```bash
+curl -X POST http://localhost:3000/integrations/auth \
+  -H "Content-Type: application/json" \
+  -d '{"login":"aprovame","password":"aprovame"}'
+```
+
+2. **Usar o token nas requisições:**
+```bash
+curl -X GET http://localhost:3000/integrations/assignor \
+  -H "Authorization: Bearer SEU_TOKEN_JWT_AQUI"
+```
+
+3. **No Swagger UI:**
+   - Clique no botão "Authorize" 🔓
+   - Insira o token obtido no login
+   - Todos os endpoints ficarão autenticados automaticamente
 
 ## 📡 Endpoints da API
 
-### Pagáveis (Payables)
+### 🔐 Autenticação
+- `POST /integrations/auth` - Realizar login e obter token JWT
+
+> **Credenciais de acesso:**
+> - Login: `aprovame`
+> - Senha: `aprovame`
+> - Token expira em: **1 minuto**
+
+### Pagáveis (Payables) 🔒
+*Todos os endpoints requerem autenticação JWT*
+
 - `POST /integrations/payable` - Criar pagável com cedente
 - `GET /integrations/payable` - Listar pagáveis (paginado)
 - `GET /integrations/payable/:id` - Buscar pagável específico
 
-### Cedentes (Assignors)
+### Cedentes (Assignors) 🔒
+*Todos os endpoints requerem autenticação JWT*
+
 - `POST /integrations/assignor` - Criar cedente
 - `GET /integrations/assignor` - Listar cedentes (paginado)
 - `GET /integrations/assignor/:id` - Buscar cedente específico
@@ -154,7 +192,8 @@ npm run lint
 - ✅ **Nível 1**: Validação de dados rigorosa
 - ✅ **Nível 2**: Persistência completa com Prisma
 - ✅ **Nível 3**: Testes unitários com 100% cobertura
-- 🚧 **Próximos**: Nível 4 em diante conforme especificação do desafio
+- ✅ **Nível 4**: Autenticação JWT completa
+- 🚧 **Próximos**: Nível 5 em diante conforme especificação do desafio
 
 ## 🎯 Destaques Técnicos
 

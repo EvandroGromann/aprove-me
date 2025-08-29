@@ -3,10 +3,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/shared/database/prisma.service';
+import { getAuthToken, authenticatedRequest } from '../helpers/auth.helper';
 
 describe('AssignorsController (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let authToken: string;
 
   const testAssignor = {
     id: '550e8400-e29b-41d4-a716-446655440000',
@@ -32,11 +34,15 @@ describe('AssignorsController (e2e)', () => {
     
     await app.init();
     await prisma.$connect();
+    
+    authToken = await getAuthToken(app);
   });
 
   beforeEach(async () => {
     await prisma.payable.deleteMany();
     await prisma.assignor.deleteMany();
+    
+    authToken = await getAuthToken(app);
   });
 
   afterAll(async () => {
@@ -48,8 +54,8 @@ describe('AssignorsController (e2e)', () => {
 
   describe('/integrations/assignor (POST)', () => {
     it('should create a new assignor', () => {
-      return request(app.getHttpServer())
-        .post('/integrations/assignor')
+      const auth = authenticatedRequest(app, authToken);
+      return auth.post('/integrations/assignor')
         .send(testAssignor)
         .expect(201)
         .expect((res) => {
@@ -67,7 +73,7 @@ describe('AssignorsController (e2e)', () => {
     });
 
     it('should return 409 when creating assignor with existing ID', async () => {
-      await request(app.getHttpServer())
+      await authenticatedRequest(app, authToken)
         .post('/integrations/assignor')
         .send(testAssignor)
         .expect(201);
@@ -77,14 +83,14 @@ describe('AssignorsController (e2e)', () => {
         email: 'different@example.com',
       };
 
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .post('/integrations/assignor')
         .send(duplicateAssignor)
         .expect(409);
     });
 
-    it('should return 400 for invalid data', () => {
-      return request(app.getHttpServer())
+    it('should return 400 for invalid assignor data', () => {
+      return authenticatedRequest(app, authToken)
         .post('/integrations/assignor')
         .send({
           id: 'invalid-uuid',
@@ -114,7 +120,7 @@ describe('AssignorsController (e2e)', () => {
     });
 
     it('should return paginated assignors', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .get('/integrations/assignor')
         .expect(200)
         .expect((res) => {
@@ -130,8 +136,8 @@ describe('AssignorsController (e2e)', () => {
         });
     });
 
-    it('should return paginated assignors with custom pagination', () => {
-      return request(app.getHttpServer())
+    it('should return paginated assignors with limit', () => {
+      return authenticatedRequest(app, authToken)
         .get('/integrations/assignor?page=1&limit=1')
         .expect(200)
         .expect((res) => {
@@ -154,7 +160,7 @@ describe('AssignorsController (e2e)', () => {
     });
 
     it('should return assignor by ID', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .get(`/integrations/assignor/${testAssignor.id}`)
         .expect(200)
         .expect((res) => {
@@ -169,7 +175,7 @@ describe('AssignorsController (e2e)', () => {
     });
 
     it('should return 404 for non-existent assignor', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .get('/integrations/assignor/550e8400-e29b-41d4-a716-446655440999')
         .expect(404);
     });
@@ -186,7 +192,7 @@ describe('AssignorsController (e2e)', () => {
         email: 'updated@example.com',
       };
 
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .patch(`/integrations/assignor/${testAssignor.id}`)
         .send(updateData)
         .expect(200)
@@ -200,7 +206,7 @@ describe('AssignorsController (e2e)', () => {
     });
 
     it('should return 404 for non-existent assignor', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .patch('/integrations/assignor/550e8400-e29b-41d4-a716-446655440999')
         .send({ name: 'Updated' })
         .expect(404);
@@ -213,13 +219,13 @@ describe('AssignorsController (e2e)', () => {
     });
 
     it('should soft delete assignor', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .delete(`/integrations/assignor/${testAssignor.id}`)
         .expect(200);
     });
 
     it('should return 404 for non-existent assignor', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .delete('/integrations/assignor/550e8400-e29b-41d4-a716-446655440999')
         .expect(404);
     });
@@ -236,7 +242,7 @@ describe('AssignorsController (e2e)', () => {
     });
 
     it('should restore soft deleted assignor', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .post(`/integrations/assignor/${testAssignor.id}/restore`)
         .expect(201)
         .expect((res) => {

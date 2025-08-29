@@ -15,21 +15,17 @@ async function bootstrap() {
     transform: true,
   }));
 
-  // Carregar configurações da API
-  const configPath = join(__dirname, '..', 'config', 'api-info.json');
+  const configPath = join(__dirname, '..', 'api-info.json');
   const apiConfig = JSON.parse(readFileSync(configPath, 'utf8'));
 
-  // Servir arquivos de configuração estáticos
-  app.useStaticAssets(join(__dirname, '..', 'config'), {
+  app.useStaticAssets(join(__dirname, '..', 'assets'), {
     prefix: '/config/',
   });
 
-  // Servir arquivos públicos
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     prefix: '/public/',
   });
 
-  // Configuração do Swagger
   const config = new DocumentBuilder()
     .setTitle(apiConfig.name)
     .setDescription(apiConfig.description)
@@ -37,7 +33,18 @@ async function bootstrap() {
     .setContact(apiConfig.contact.name, apiConfig.contact.url, apiConfig.contact.email)
     .setLicense(apiConfig.license.name, apiConfig.license.url)
     .addServer(apiConfig.servers[0].url, apiConfig.servers[0].description)
-    .addTag('integrations', 'Endpoints de integração')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Token JWT obtido através do endpoint de autenticação',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addTag('Autenticação', 'Endpoints de autenticação e autorização')
     .addTag('assignors', 'Gerenciamento de cedentes')
     .addTag('payables', 'Gerenciamento de pagáveis')
     .build();
@@ -45,7 +52,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document, {
     customSiteTitle: `${apiConfig.name} - Documentation`,
-    customfavIcon: '/config/assets/logo.png', // ← Logo da pasta config
+    customfavIcon: '/config/assets/logo.png',
     customCss: `
       .swagger-ui .topbar { 
         background-color: ${apiConfig.branding.primaryColor}; 

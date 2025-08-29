@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { AssignorsService } from './assignors.service';
 import { AssignorsController } from './assignors.controller';
 import { PrismaModule } from '../../shared/database/prisma.module';
+import { SharedAuthModule } from '../../shared/auth/shared-auth.module';
 import { AssignorRepository } from './repositories/assignor.repository';
 import { PrismaAssignorRepository } from './repositories/prisma-assignor.repository';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, SharedAuthModule],
   controllers: [AssignorsController],
   providers: [
     AssignorsService,

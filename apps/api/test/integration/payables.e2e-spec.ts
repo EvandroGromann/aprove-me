@@ -3,10 +3,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/shared/database/prisma.service';
+import { getAuthToken, authenticatedRequest } from '../helpers/auth.helper';
 
 describe('PayablesController (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let authToken: string;
 
   const testAssignor = {
     id: '550e8400-e29b-41d4-a716-446655440000',
@@ -38,13 +40,16 @@ describe('PayablesController (e2e)', () => {
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     
     await app.init();
-
     await prisma.$connect();
+    
+    authToken = await getAuthToken(app);
   });
 
   beforeEach(async () => {
     await prisma.payable.deleteMany();
     await prisma.assignor.deleteMany();
+    
+    authToken = await getAuthToken(app);
   });
 
   afterAll(async () => {
@@ -56,7 +61,7 @@ describe('PayablesController (e2e)', () => {
 
   describe('/integrations/payable (POST)', () => {
     it('should create a new payable with new assignor', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .post('/integrations/payable')
         .send(testPayable)
         .expect(201)
@@ -92,7 +97,7 @@ describe('PayablesController (e2e)', () => {
         },
       };
 
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .post('/integrations/payable')
         .send(payableWithExistingAssignor)
         .expect(201)
@@ -110,19 +115,19 @@ describe('PayablesController (e2e)', () => {
     });
 
     it('should return 409 when creating payable with existing ID', async () => {
-      await request(app.getHttpServer())
+      await authenticatedRequest(app, authToken)
         .post('/integrations/payable')
         .send(testPayable)
         .expect(201);
 
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .post('/integrations/payable')
         .send(testPayable)
         .expect(409);
     });
 
     it('should return 400 for invalid payable data', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .post('/integrations/payable')
         .send({
           id: 'invalid-uuid',
@@ -140,14 +145,14 @@ describe('PayablesController (e2e)', () => {
     });
 
     it('should return 400 for missing required fields', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .post('/integrations/payable')
         .send({})
         .expect(400);
     });
 
     it('should validate minimum value', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .post('/integrations/payable')
         .send({
           ...testPayable,
@@ -180,7 +185,7 @@ describe('PayablesController (e2e)', () => {
     });
 
     it('should return paginated payables', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .get('/integrations/payable')
         .expect(200)
         .expect((res) => {
@@ -199,7 +204,7 @@ describe('PayablesController (e2e)', () => {
     });
 
     it('should return paginated payables with custom pagination', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .get('/integrations/payable?page=1&limit=1')
         .expect(200)
         .expect((res) => {
@@ -216,7 +221,7 @@ describe('PayablesController (e2e)', () => {
     });
 
     it('should handle invalid pagination parameters gracefully', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .get('/integrations/payable?page=invalid&limit=invalid')
         .expect(200)
         .expect((res) => {
@@ -242,7 +247,7 @@ describe('PayablesController (e2e)', () => {
     });
 
     it('should return payable by ID with assignor data', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .get(`/integrations/payable/${testPayable.id}`)
         .expect(200)
         .expect((res) => {
@@ -263,13 +268,13 @@ describe('PayablesController (e2e)', () => {
     });
 
     it('should return 404 for non-existent payable', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .get('/integrations/payable/550e8400-e29b-41d4-a716-446655440999')
         .expect(404);
     });
 
     it('should return 404 for invalid UUID format', () => {
-      return request(app.getHttpServer())
+      return authenticatedRequest(app, authToken)
         .get('/integrations/payable/invalid-uuid')
         .expect(404);
     });
@@ -277,7 +282,7 @@ describe('PayablesController (e2e)', () => {
 
   describe('Data integrity tests', () => {
     it('should maintain referential integrity between payables and assignors', async () => {
-      const response = await request(app.getHttpServer())
+      const response = await authenticatedRequest(app, authToken)
         .post('/integrations/payable')
         .send(testPayable)
         .expect(201);
@@ -314,7 +319,7 @@ describe('PayablesController (e2e)', () => {
         email: 'updated@example.com',
       };
 
-      await request(app.getHttpServer())
+      await authenticatedRequest(app, authToken)
         .post('/integrations/payable')
         .send({
           ...testPayable,
