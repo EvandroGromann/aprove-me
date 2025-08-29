@@ -9,12 +9,18 @@ export class PrismaAssignorRepository implements AssignorRepository {
 
   async findById(id: string): Promise<AssignorEntity | null> {
     return this.prisma.assignor.findUnique({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: null
+      },
     });
   }
 
   async findAll(): Promise<AssignorEntity[]> {
     return this.prisma.assignor.findMany({
+      where: {
+        deletedAt: null
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -25,6 +31,9 @@ export class PrismaAssignorRepository implements AssignorRepository {
     return this.prisma.assignor.findMany({
       skip,
       take: limit,
+      where: {
+        deletedAt: null
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -32,29 +41,45 @@ export class PrismaAssignorRepository implements AssignorRepository {
   }
 
   async count(): Promise<number> {
-    return this.prisma.assignor.count();
+    return this.prisma.assignor.count({
+      where: {
+        deletedAt: null, // Só conta não deletados
+      },
+    });
   }
 
-  async create(assignor: Omit<AssignorEntity, 'createdAt' | 'updatedAt'>): Promise<AssignorEntity> {
+  async create(assignor: Omit<AssignorEntity, 'createdAt' | 'updatedAt' | 'deletedAt'>): Promise<AssignorEntity> {
     return this.prisma.assignor.create({
       data: assignor,
     });
   }
 
-  async update(id: string, assignor: Partial<Omit<AssignorEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<AssignorEntity> {
+  async update(id: string, assignor: Partial<Omit<AssignorEntity, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>): Promise<AssignorEntity> {
     return this.prisma.assignor.update({
       where: { id },
       data: assignor,
     });
   }
 
-  async delete(id: string): Promise<void> {
-    await this.prisma.assignor.delete({
+  async softDelete(id: string): Promise<void> {
+    await this.prisma.assignor.update({
       where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
     });
   }
 
-  async upsert(assignor: Omit<AssignorEntity, 'createdAt' | 'updatedAt'>): Promise<AssignorEntity> {
+  async restore(id: string): Promise<AssignorEntity> {
+    return this.prisma.assignor.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+      },
+    });
+  }
+
+  async upsert(assignor: Omit<AssignorEntity, 'createdAt' | 'updatedAt' | 'deletedAt'>): Promise<AssignorEntity> {
     return this.prisma.assignor.upsert({
       where: { id: assignor.id },
       update: {

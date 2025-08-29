@@ -36,4 +36,9 @@ export class AssignorsController {
   remove(@Param('id') id: string) {
     return this.assignorsService.remove(id);
   }
+
+  @Post('assignor/:id/restore')
+  restore(@Param('id') id: string) {
+    return this.assignorsService.restore(id);
+  }
 }

@@ -60,6 +60,10 @@ export class AssignorsService {
       throw new NotFoundException('Cedente não encontrado');
     }
 
-    await this.assignorRepository.delete(id);
+    await this.assignorRepository.softDelete(id);
+  }
+
+  async restore(id: string) {
+    return this.assignorRepository.restore(id);
   }
 }

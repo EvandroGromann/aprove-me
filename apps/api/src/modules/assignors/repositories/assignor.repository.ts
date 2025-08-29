@@ -5,8 +5,9 @@ export abstract class AssignorRepository {
   abstract findAll(): Promise<AssignorEntity[]>;
   abstract findAllPaginated(skip: number, limit: number): Promise<AssignorEntity[]>;
   abstract count(): Promise<number>;
-  abstract create(assignor: Omit<AssignorEntity, 'createdAt' | 'updatedAt'>): Promise<AssignorEntity>;
-  abstract update(id: string, assignor: Partial<Omit<AssignorEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<AssignorEntity>;
-  abstract delete(id: string): Promise<void>;
-  abstract upsert(assignor: Omit<AssignorEntity, 'createdAt' | 'updatedAt'>): Promise<AssignorEntity>;
+  abstract create(assignor: Omit<AssignorEntity, 'createdAt' | 'updatedAt' | 'deletedAt'>): Promise<AssignorEntity>;
+  abstract update(id: string, assignor: Partial<Omit<AssignorEntity, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>): Promise<AssignorEntity>;
+  abstract softDelete(id: string): Promise<void>;
+  abstract restore(id: string): Promise<AssignorEntity>;
+  abstract upsert(assignor: Omit<AssignorEntity, 'createdAt' | 'updatedAt' | 'deletedAt'>): Promise<AssignorEntity>;
 }
