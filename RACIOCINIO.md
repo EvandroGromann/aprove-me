@@ -33,26 +33,30 @@ Seguindo as boas práticas do NestJS e princípios de DDD, organizei assim:
 
 ```
 src/
-├── core/                    # Núcleo da aplicação
-│   ├── database/           # Configuração de banco
-│   └── shared/             # DTOs e utilitários compartilhados
-├── modules/                # Módulos de domínio
-│   ├── assignor/          # Domínio do Cedente
-│   │   ├── dto/
-│   │   ├── entities/
-│   │   ├── repositories/
-│   │   ├── services/
-│   │   ├── assignor.controller.ts  # @Controller('integrations/assignor')
-│   │   └── assignor.module.ts
-│   ├── payable/            # Domínio do Pagável
-│   │   ├── dto/
-│   │   ├── entities/
-│   │   ├── repositories/
-│   │   ├── services/
-│   │   ├── payable.controller.ts # @Controller('integrations/payable') 
-│   │   └── payable.module.ts
-│   └── auth/              # Autenticação (Nível 4+)
-└── app.module.ts
+├── main.ts
+├── app.module.ts
+├── shared/
+│   ├── database/          # Infraestrutura compartilhada
+│   │   ├── prisma.service.ts
+│   │   └── prisma.module.ts
+│   └── dto/               # DTOs reutilizáveis
+│       └── assignor-summary.dto.ts
+└── modules/
+    ├── assignors/         # Domínio de Cedentes
+    │   ├── dto/
+    │   ├── entities/
+    │   ├── repositories/
+    │   ├── assignor.controller.ts # @Controller('integrations')
+    │   ├── assignor.service.ts
+    │   └── assignor.module.ts
+    ├── payables/          # Domínio de Pagáveis
+    │   ├── dto/
+    │   ├── entities/
+    │   ├── repositories/
+    │   ├── services/
+    │   ├── payable.controller.ts # @Controller('integrations/payable') 
+    │   └── payable.module.ts
+    └── auth/              # Autenticação (Nível 4+)
 ```
 
 ### Por Que Escolhi Essa Abordagem

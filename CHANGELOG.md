@@ -7,6 +7,25 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-08-29
+
+### Added
+- Documentação completa da API com Swagger/OpenAPI
+- Configuração centralizada em `config/api-info.json` para metadados da API
+- Servindo de assets estáticos para branding e configuração
+- Decoradores Swagger em todos os controllers e DTOs
+- Documentação detalhada de endpoints com exemplos e códigos de status
+- Estrutura empresarial de configuração para deploy profissional
+- Suporte a branding com logo e estilos personalizados
+- Interface de documentação interativa em `/api/docs`
+
+### Changed
+- Estrutura de configuração movida para diretório `config/` 
+- Main.ts atualizado para carregar configurações dinamicamente
+- DTOs aprimorados com decoradores @ApiProperty para documentação
+
+## [1.0.0] - 2025-08-29
+
 ### Added
 - Sistema completo de gerenciamento de recebíveis (Aprove-me)
 - API REST com NestJS e TypeScript

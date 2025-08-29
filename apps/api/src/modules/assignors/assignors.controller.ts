@@ -1,18 +1,56 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { AssignorsService } from './assignors.service';
 import { CreateAssignorDto } from './dto/create-assignor.dto';
 import { UpdateAssignorDto } from './dto/update-assignor.dto';
+import { AssignorResponseDto } from './dto/assignor-response.dto';
 
+@ApiTags('assignors')
 @Controller('integrations')
 export class AssignorsController {
   constructor(private readonly assignorsService: AssignorsService) {}
 
   @Post('assignor')
-  create(@Body() createAssignorDto: CreateAssignorDto) {
+  @ApiOperation({ summary: 'Criar um novo cedente' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Cedente criado com sucesso',
+    type: AssignorResponseDto 
+  })
+  @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  @ApiResponse({ status: 409, description: 'Cedente já existe' })
+  create(@Body() createAssignorDto: CreateAssignorDto): Promise<AssignorResponseDto> {
     return this.assignorsService.create(createAssignorDto);
   }
 
   @Get('assignor')
+  @ApiOperation({ summary: 'Listar cedentes com paginação' })
+  @ApiQuery({ name: 'page', required: false, description: 'Número da página (padrão: 1)' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Itens por página (padrão: 10)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de cedentes com paginação',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/AssignorResponseDto' }
+        },
+        meta: {
+          type: 'object',
+          properties: {
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            total: { type: 'number' },
+            totalPages: { type: 'number' },
+            hasNext: { type: 'boolean' },
+            hasPrev: { type: 'boolean' }
+          }
+        }
+      }
+    }
+  })
   findAll(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
@@ -23,22 +61,54 @@ export class AssignorsController {
   }
 
   @Get('assignor/:id')
-  findOne(@Param('id') id: string) {
+  @ApiOperation({ summary: 'Buscar cedente por ID' })
+  @ApiParam({ name: 'id', description: 'UUID do cedente' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Cedente encontrado',
+    type: AssignorResponseDto 
+  })
+  @ApiResponse({ status: 404, description: 'Cedente não encontrado' })
+  findOne(@Param('id') id: string): Promise<AssignorResponseDto> {
     return this.assignorsService.findOne(id);
   }
 
   @Patch('assignor/:id')
-  update(@Param('id') id: string, @Body() updateAssignorDto: UpdateAssignorDto) {
+  @ApiOperation({ summary: 'Atualizar dados do cedente' })
+  @ApiParam({ name: 'id', description: 'UUID do cedente' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Cedente atualizado com sucesso',
+    type: AssignorResponseDto 
+  })
+  @ApiResponse({ status: 404, description: 'Cedente não encontrado' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  update(
+    @Param('id') id: string, 
+    @Body() updateAssignorDto: UpdateAssignorDto
+  ): Promise<AssignorResponseDto> {
     return this.assignorsService.update(id, updateAssignorDto);
   }
 
   @Delete('assignor/:id')
+  @ApiOperation({ summary: 'Remover cedente (soft delete)' })
+  @ApiParam({ name: 'id', description: 'UUID do cedente' })
+  @ApiResponse({ status: 200, description: 'Cedente removido com sucesso' })
+  @ApiResponse({ status: 404, description: 'Cedente não encontrado' })
   remove(@Param('id') id: string) {
     return this.assignorsService.remove(id);
   }
 
   @Post('assignor/:id/restore')
-  restore(@Param('id') id: string) {
+  @ApiOperation({ summary: 'Restaurar cedente removido' })
+  @ApiParam({ name: 'id', description: 'UUID do cedente' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Cedente restaurado com sucesso',
+    type: AssignorResponseDto 
+  })
+  @ApiResponse({ status: 404, description: 'Cedente não encontrado' })
+  restore(@Param('id') id: string): Promise<AssignorResponseDto> {
     return this.assignorsService.restore(id);
   }
 }

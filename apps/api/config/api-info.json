@@ -1,0 +1,31 @@
+{
+  "name": "Aprove-me API",
+  "description": "API para gerenciamento de recebíveis e cedentes",
+  "version": "1.0.0",
+  "author": "Bankme",
+  "contact": {
+    "name": "Equipe Bankme",
+    "email": "contato@bankme.com.br",
+    "url": "https://bankme.tech"
+  },
+  "license": {
+    "name": "MIT",
+    "url": "https://opensource.org/licenses/MIT"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor de desenvolvimento"
+    },
+    {
+      "url": "https://api.bankme.com.br",
+      "description": "Servidor de produção"
+    }
+  ],
+  "branding": {
+    "logo": "./assets/logo.png",
+    "favicon": "./assets/favicon.ico",
+    "primaryColor": "#1976d2",
+    "secondaryColor": "#42a5f5"
+  }
+}
