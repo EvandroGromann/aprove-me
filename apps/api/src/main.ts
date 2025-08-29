@@ -5,9 +5,22 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { readFileSync } from 'fs';
 import { AppModule } from './app.module';
+import { CustomLogger } from './shared/logger/custom-logger.service';
+import { LoggingInterceptor } from './shared/logger/logging.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true, // Buffer logs until logger is attached
+  });
+  
+  // Get custom logger instance
+  const logger = await app.resolve(CustomLogger);
+  logger.setContext('Bootstrap');
+  app.useLogger(logger);
+  
+  // Get logging interceptor instance
+  const loggingInterceptor = await app.resolve(LoggingInterceptor);
+  app.useGlobalInterceptors(loggingInterceptor);
   
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -64,8 +77,8 @@ async function bootstrap() {
   });
 
   await app.listen(3000);
-  console.log('🚀 Server running on http://localhost:3000');
-  console.log('📚 API Documentation: http://localhost:3000/api/docs');
-  console.log(`📋 API Info: ${apiConfig.name} v${apiConfig.version}`);
+  logger.log('🚀 Server running on http://localhost:3000');
+  logger.log('📚 API Documentation: http://localhost:3000/api/docs');
+  logger.log(`📋 API Info: ${apiConfig.name} v${apiConfig.version}`);
 }
 bootstrap();

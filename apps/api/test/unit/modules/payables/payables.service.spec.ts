@@ -6,6 +6,7 @@ import { AssignorRepository } from '../../../../src/modules/assignors/repositori
 import { CreatePayableRequestDto } from '../../../../src/modules/payables/dto/create-payable-request.dto';
 import { PayableEntity } from '../../../../src/modules/payables/entities/payable.entity';
 import { AssignorEntity } from '../../../../src/modules/assignors/entities/assignor.entity';
+import { mockLoggerProvider } from '../../../helpers/logger.helper';
 
 describe('PayablesService', () => {
   let service: PayablesService;
@@ -65,6 +66,7 @@ describe('PayablesService', () => {
           provide: AssignorRepository,
           useValue: mockAssignorRepository,
         },
+        mockLoggerProvider,
       ],
     }).compile();
 

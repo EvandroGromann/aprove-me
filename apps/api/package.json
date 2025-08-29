@@ -1,7 +1,7 @@
 {
   "name": "aprove-me-api",
-  "version": "1.4.1",
-  "description": "API para gestão de pagáveis - Desafio Bankme",
+  "version": "1.5.0",
+  "description": "API para gestão de pagáveis com sistema de permissões - Desafio Bankme",
   "main": "dist/main.js",
   "scripts": {
     "build": "nest build",
@@ -17,7 +17,9 @@
     "test:cov": "jest --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:all": "npm run test && npm run test:e2e",
-    "validate": "npm run build && npm run test:all"
+    "validate": "npm run build && npm run test:all",
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:reset": "npx prisma migrate reset --force && npm run db:seed"
   },
   "keywords": [
     "nestjs",
@@ -35,16 +37,20 @@
     "@nestjs/platform-express": "^11.1.6",
     "@nestjs/swagger": "^11.2.0",
     "@prisma/client": "^6.15.0",
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "nest-winston": "^1.10.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^6.15.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "swagger-ui-express": "^5.0.1",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.10",

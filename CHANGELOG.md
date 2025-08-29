@@ -7,6 +7,63 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.5.0] - 2025-08-29 - Nível 5 Completo: Sistema de Permissões
+
+### 🔐 Added
+- **Sistema de permissões dinâmico** baseado em banco de dados
+- **Módulo Users completo** com CRUD de usuários
+- **Hash de senhas** com bcrypt para máxima segurança
+- **Autenticação dinâmica** substituindo credenciais fixas
+- **Tabela de usuários** com soft delete
+- **Seed automático** criando usuário padrão `aprovame/aprovame`
+- **30+ testes unitários** para módulo Users
+- **Testes E2E** para endpoints de usuários
+- **Arquitetura refatorada** com melhor separação de responsabilidades
+
+### 🏗️ Changed
+- **BREAKING**: AuthService agora usa UsersRepository diretamente (melhor performance)
+- **BREAKING**: Autenticação não usa mais credenciais fixas
+- Tokens JWT agora contêm ID real do usuário do banco
+- AuthModule refatorado para eliminar dependências circulares
+- Estrutura mais limpa seguindo boas práticas do NestJS
+
+### 🔧 Technical Details
+- **UsersRepository**: CRUD completo com geração de IDs únicos
+- **UsersService**: Validação de senhas, hash com bcrypt, DTOs de resposta
+- **UsersController**: Endpoints protegidos com JWT, validação robusta
+- **AuthService**: Integração direta com repository para melhor performance
+- **Database Schema**: Modelo User com login único e soft delete
+- **Prisma Migrations**: Adicionada tabela users com índices apropriados
+
+### 📊 Test Coverage
+- **120+ testes unitários** passando
+- **50+ testes E2E** cobrindo cenários de usuários
+- **100% cobertura** mantida em todos os módulos
+- Testes de entidade User para cobertura completa
+- Cenários de edge cases (login existente, senhas inválidas, etc.)
+
+### 🚀 Security Enhancements
+- **Senhas hasheadas** com bcrypt (salt rounds 10)
+- **Validação de login único** prevenindo duplicatas
+- **Soft delete** para auditoria de usuários
+- **Tokens JWT** com payload baseado em dados reais do banco
+- **Validação robusta** em todas as operações de usuário
+
+### 🎯 API Endpoints
+- `POST /users` - Criar novo usuário (requer auth)
+- `GET /users` - Listar usuários (requer auth)
+- `GET /users/:id` - Buscar usuário (requer auth)
+- `PATCH /users/:id` - Atualizar usuário (requer auth)
+- `DELETE /users/:id` - Soft delete usuário (requer auth)
+
+### 📝 Documentation
+- **README atualizado** com instruções do sistema de permissões
+- **CHANGELOG detalhado** documentando todas as mudanças
+- **Swagger atualizado** com endpoints de usuários
+- **Guias de autenticação** atualizados para novo sistema
+
+---
+
 ## [1.4.1] - 2025-08-29 - Correções e Melhorias de Estrutura
 
 ### Fixed

@@ -6,13 +6,14 @@ import { PayableRepository } from '../../../../src/modules/payables/repositories
 import { PrismaPayableRepository } from '../../../../src/modules/payables/repositories/prisma-payable.repository';
 import { AssignorsModule } from '../../../../src/modules/assignors/assignors.module';
 import { PrismaModule } from '../../../../src/shared/database/prisma.module';
+import { LoggerModule } from '../../../../src/shared/logger/logger.module';
 
 describe('PayablesModule', () => {
   let module: TestingModule;
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
-      imports: [PayablesModule, PrismaModule, AssignorsModule],
+      imports: [PayablesModule, PrismaModule, AssignorsModule, LoggerModule],
     }).compile();
   });
 

@@ -1,26 +1,29 @@
 # Aprove-me - Sistema de Gestão de Pagáveis
 
 ![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
-![Unit Tests](https://img.shields.io/badge/unit%20tests-89%20passing-brightgreen)
-![E2E Tests](https://img.shields.io/badge/e2e%20tests-47%20passing-brightgreen)
+![Unit Tests](https://img.shields.io/badge/unit%20tests-120%20passing-brightgreen)
+![E2E Tests](https://img.shields.io/badge/e2e%20tests-50%20passing-brightgreen)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
 ![NestJS](https://img.shields.io/badge/NestJS-10.0-red)
 ![Prisma](https://img.shields.io/badge/Prisma-5.0-2D3748)
 
-Sistema completo de gestão de pagáveis financeiros desenvolvido com NestJS, seguindo princípios de DDD e Clean Architecture, com 100% de cobertura de testes.
+Sistema completo de gestão de pagáveis financeiros desenvolvido com NestJS, seguindo princípios de DDD e Clean Architecture, com 100% de cobertura de testes e sistema de permissões avançado.
 
 ## 📋 Sobre o Projeto
 
 Sistema robusto para gestão de pagáveis financeiros que permite operações completas de CRUD para:
 - **Pagáveis (Payables)**: Representações digitais de dívidas a serem pagas/recebidas
 - **Cedentes (Assignors)**: Pessoas/empresas beneficiárias de um pagável
+- **Usuários (Users)**: Sistema de permissões e autenticação dinâmica
 
 ### ✨ Funcionalidades Implementadas
 
 - ✅ **API REST completa** com validação rigorosa
-- ✅ **Autenticação JWT** com expiração de 1 minuto
+- ✅ **Sistema de permissões** com cadastro de usuários no banco
+- ✅ **Autenticação JWT** dinâmica baseada em banco de dados
+- ✅ **Hash de senhas** com bcrypt para segurança
 - ✅ **Documentação Swagger/OpenAPI** interativa
-- ✅ **Soft Delete** para cedentes 
+- ✅ **Soft Delete** para cedentes e usuários
 - ✅ **Paginação** em consultas de listagem
 - ✅ **Relacionamentos** entre pagáveis e cedentes
 - ✅ **Testes unitários** com 100% de cobertura
@@ -38,7 +41,8 @@ apps/
 │       ├── modules/     # Módulos de domínio
 │       │   ├── auth/         # Autenticação JWT
 │       │   ├── assignors/    # Domínio do Cedente  
-│       │   └── payables/     # Domínio do Pagável
+│       │   ├── payables/     # Domínio do Pagável
+│       │   └── users/        # Sistema de Usuários/Permissões
 │       ├── shared/      # Componentes compartilhados
 │       │   ├── auth/         # Guards e estratégias JWT
 │       │   └── database/     # Configuração do Prisma
@@ -60,8 +64,8 @@ apps/
 - **Jest** - Framework de testes com 100% de cobertura
 
 ### Testes
-- **70 testes unitários** - Cobertura completa da lógica de negócio
-- **29 testes E2E** - Validação de todos os endpoints
+- **120+ testes unitários** - Cobertura completa da lógica de negócio
+- **50+ testes E2E** - Validação de todos os endpoints
 - **Execução sequencial** - Evita race conditions
 - **Cleanup automático** - Isolamento entre testes
 
@@ -84,6 +88,16 @@ apps/
 | phone | String(20) | Telefone |
 | name | String(140) | Nome/Razão social |
 
+### Usuário (Users)
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | Identificação única |
+| login | String | Login único para autenticação |
+| password | String | Senha hasheada com bcrypt |
+| createdAt | Date | Data de criação |
+| updatedAt | Date | Data de atualização |
+| deletedAt | Date? | Soft delete |
+
 ## 🛠️ Instalação e Execução
 
 ### Pré-requisitos
@@ -103,6 +117,9 @@ npm install
 npx prisma generate
 npx prisma migrate dev
 
+# Execute o seed para criar usuário padrão
+npm run db:seed
+
 # Execute em desenvolvimento
 npm run dev
 
@@ -116,20 +133,37 @@ A API estará disponível em:
 
 ### 🔐 Como usar a autenticação
 
-1. **Obter token JWT:**
+O sistema agora utiliza **autenticação dinâmica baseada em banco de dados**.
+
+1. **Usuário padrão (criado automaticamente):**
+   - Login: `aprovame`
+   - Senha: `aprovame`
+
+2. **Obter token JWT:**
 ```bash
 curl -X POST http://localhost:3000/integrations/auth \
   -H "Content-Type: application/json" \
   -d '{"login":"aprovame","password":"aprovame"}'
 ```
 
-2. **Usar o token nas requisições:**
+3. **Criar novos usuários (requer autenticação):**
+```bash
+curl -X POST http://localhost:3000/users \
+  -H "Authorization: Bearer SEU_TOKEN_JWT" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "login": "novouser",
+    "password": "senha123"
+  }'
+```
+
+4. **Usar o token nas requisições:**
 ```bash
 curl -X GET http://localhost:3000/integrations/assignor \
   -H "Authorization: Bearer SEU_TOKEN_JWT_AQUI"
 ```
 
-3. **No Swagger UI:**
+5. **No Swagger UI:**
    - Clique no botão "Authorize" 🔓
    - Insira o token obtido no login
    - Todos os endpoints ficarão autenticados automaticamente
@@ -139,10 +173,20 @@ curl -X GET http://localhost:3000/integrations/assignor \
 ### 🔐 Autenticação
 - `POST /integrations/auth` - Realizar login e obter token JWT
 
-> **Credenciais de acesso:**
-> - Login: `aprovame`
-> - Senha: `aprovame`
+> **Sistema de Permissões:**
+> - Autenticação dinâmica baseada em banco de dados
+> - Usuário padrão: `aprovame/aprovame`
 > - Token expira em: **1 minuto**
+> - Senhas hasheadas com bcrypt
+
+### 👥 Usuários (Users) 🔒
+*Todos os endpoints requerem autenticação JWT*
+
+- `POST /users` - Criar novo usuário
+- `GET /users` - Listar todos os usuários
+- `GET /users/:id` - Buscar usuário específico
+- `PATCH /users/:id` - Atualizar usuário
+- `DELETE /users/:id` - Soft delete de usuário
 
 ### Pagáveis (Payables) 🔒
 *Todos os endpoints requerem autenticação JWT*
@@ -183,8 +227,8 @@ npm run lint
 
 ### Métricas de Qualidade
 - **100% de cobertura** de código nos testes unitários
-- **29 testes E2E** cobrindo todos os cenários de uso
-- **70 testes unitários** validando a lógica de negócio
+- **50+ testes E2E** cobrindo todos os cenários de uso
+- **120+ testes unitários** validando a lógica de negócio
 - **Zero race conditions** com execução sequencial
 
 ## 📈 Status de Implementação
@@ -193,17 +237,21 @@ npm run lint
 - ✅ **Nível 2**: Persistência completa com Prisma
 - ✅ **Nível 3**: Testes unitários com 100% cobertura
 - ✅ **Nível 4**: Autenticação JWT completa
-- 🚧 **Próximos**: Nível 5 em diante conforme especificação do desafio
+- ✅ **Nível 5**: Sistema de permissões com banco de dados
+- 🚧 **Próximos**: Nível 6 em diante conforme especificação do desafio
 
 ## 🎯 Destaques Técnicos
 
 - **Domain-Driven Design** com separação clara de responsabilidades
 - **Repository Pattern** para abstração de dados
+- **Sistema de Permissões** dinâmico baseado em banco de dados
+- **Hash de senhas** com bcrypt para máxima segurança
 - **100% Test Coverage** garantindo qualidade e confiabilidade
 - **Soft Delete** preservando integridade histórica
 - **Validação robusta** em todos os pontos de entrada
 - **Documentação OpenAPI** para facilitar integração
 - **Execução sequencial de testes** evitando race conditions
+- **Arquitetura modular** facilitando manutenção e extensibilidade
 
 ---
 
