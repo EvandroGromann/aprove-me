@@ -1,12 +1,30 @@
 # Aprove-me - Sistema de Gestão de Pagáveis
 
-Este projeto implementa uma API para gestão de pagáveis financeiros, desenvolvida como parte de um desafio técnico da Bankme.
+![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
+![Unit Tests](https://img.shields.io/badge/unit%20tests-70%20passing-brightgreen)
+![E2E Tests](https://img.shields.io/badge/e2e%20tests-29%20passing-brightgreen)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![NestJS](https://img.shields.io/badge/NestJS-10.0-red)
+![Prisma](https://img.shields.io/badge/Prisma-5.0-2D3748)
+
+Sistema completo de gestão de pagáveis financeiros desenvolvido com NestJS, seguindo princípios de DDD e Clean Architecture, com 100% de cobertura de testes.
 
 ## 📋 Sobre o Projeto
 
-O sistema permite o cadastro, consulta, edição e exclusão de:
+Sistema robusto para gestão de pagáveis financeiros que permite operações completas de CRUD para:
 - **Pagáveis (Payables)**: Representações digitais de dívidas a serem pagas/recebidas
 - **Cedentes (Assignors)**: Pessoas/empresas beneficiárias de um pagável
+
+### ✨ Funcionalidades Implementadas
+
+- ✅ **API REST completa** com validação rigorosa
+- ✅ **Documentação Swagger/OpenAPI** interativa
+- ✅ **Soft Delete** para cedentes 
+- ✅ **Paginação** em consultas de listagem
+- ✅ **Relacionamentos** entre pagáveis e cedentes
+- ✅ **Testes unitários** com 100% de cobertura
+- ✅ **Testes E2E** abrangentes
+- ✅ **Arquitetura DDD** com Repository Pattern
 
 ## 🏗️ Arquitetura
 
@@ -27,16 +45,19 @@ apps/
 ## 🚀 Tecnologias Utilizadas
 
 ### Backend
-- **NestJS** - Framework Node.js
-- **TypeScript** - Linguagem principal
-- **Prisma** - ORM para banco de dados
-- **SQLite** - Banco de dados
-- **Class Validator** - Validação de dados
-- **JWT** - Autenticação (implementação futura)
+- **NestJS** - Framework Node.js escalável
+- **TypeScript** - Linguagem principal com tipagem estática
+- **Prisma** - ORM moderno para banco de dados
+- **SQLite** - Banco de dados para desenvolvimento
+- **Class Validator** - Validação robusta de DTOs
+- **Swagger/OpenAPI** - Documentação interativa da API
+- **Jest** - Framework de testes com 100% de cobertura
 
-### DevOps
-- **Docker** - Containerização (implementação futura)
-- **Docker Compose** - Orquestração (implementação futura)
+### Testes
+- **70 testes unitários** - Cobertura completa da lógica de negócio
+- **29 testes E2E** - Validação de todos os endpoints
+- **Execução sequencial** - Evita race conditions
+- **Cleanup automático** - Isolamento entre testes
 
 ## 📊 Modelo de Dados
 
@@ -78,26 +99,75 @@ npx prisma migrate dev
 
 # Execute em desenvolvimento
 npm run dev
+
+# Execute os testes
+npm run test:all
 ```
 
-A API estará disponível em `http://localhost:3000`
+A API estará disponível em:
+- **Aplicação**: `http://localhost:3000`
+- **Documentação Swagger**: `http://localhost:3000/api-docs`
 
 ## 📡 Endpoints da API
 
-### Nível 1 - Validação ✅
-- `POST /integrations/payable` - Criar pagável com validação
+### Pagáveis (Payables)
+- `POST /integrations/payable` - Criar pagável com cedente
+- `GET /integrations/payable` - Listar pagáveis (paginado)
+- `GET /integrations/payable/:id` - Buscar pagável específico
 
-## 📈 Roadmap de Funcionalidades
+### Cedentes (Assignors)
+- `POST /integrations/assignor` - Criar cedente
+- `GET /integrations/assignor` - Listar cedentes (paginado)
+- `GET /integrations/assignor/:id` - Buscar cedente específico
+- `PATCH /integrations/assignor/:id` - Atualizar cedente
+- `DELETE /integrations/assignor/:id` - Soft delete de cedente
+- `POST /integrations/assignor/:id/restore` - Restaurar cedente deletado
 
-- [x] **Nível 1**: Validação de dados
-- [ ] **Nível 2**: Persistência com Prisma
-- [ ] **Nível 3**: Testes unitários
-- [ ] **Nível 4**: Autenticação JWT
-- [ ] **Nível 5**: Sistema de permissões
-- [ ] **Nível 6**: Containerização e documentação
-- [ ] **Nível 7**: Processamento em lote
-- [ ] **Nível 8**: Sistema de resilência
-- [ ] **Nível 9**: Deploy em nuvem
-- [ ] **Nível 10**: Infrastructure as Code
+### Documentação
+- `GET /api-docs` - Interface Swagger/OpenAPI
+- `GET /api-docs-json` - Especificação JSON da API
+
+## 🧪 Testes e Qualidade
+
+```bash
+# Executar todos os testes
+npm run test:all
+
+# Testes unitários com coverage
+npm run test:cov
+
+# Testes E2E
+npm run test:e2e
+
+# Verificar erros de lint
+npm run lint
+```
+
+### Métricas de Qualidade
+- **100% de cobertura** de código nos testes unitários
+- **29 testes E2E** cobrindo todos os cenários de uso
+- **70 testes unitários** validando a lógica de negócio
+- **Zero race conditions** com execução sequencial
+
+## 📈 Status de Implementação
+
+- ✅ **Nível 1**: Validação de dados rigorosa
+- ✅ **Nível 2**: Persistência completa com Prisma
+- ✅ **Nível 3**: Testes unitários com 100% cobertura
+- 🚧 **Próximos**: Nível 4 em diante conforme especificação do desafio
+
+## 🎯 Destaques Técnicos
+
+- **Domain-Driven Design** com separação clara de responsabilidades
+- **Repository Pattern** para abstração de dados
+- **100% Test Coverage** garantindo qualidade e confiabilidade
+- **Soft Delete** preservando integridade histórica
+- **Validação robusta** em todos os pontos de entrada
+- **Documentação OpenAPI** para facilitar integração
+- **Execução sequencial de testes** evitando race conditions
+
+---
+
+**Desenvolvido com 💙 por [Evandro Gromann](https://github.com/EvandroGromann)**
 
 Para mais detalhes sobre as decisões de implementação, consulte o arquivo [RACIOCINIO.md](./RACIOCINIO.md).

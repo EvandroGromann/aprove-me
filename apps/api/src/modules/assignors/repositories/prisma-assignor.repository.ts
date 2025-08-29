@@ -43,7 +43,7 @@ export class PrismaAssignorRepository implements AssignorRepository {
   async count(): Promise<number> {
     return this.prisma.assignor.count({
       where: {
-        deletedAt: null, // Só conta não deletados
+        deletedAt: null,
       },
     });
   }
@@ -87,6 +87,7 @@ export class PrismaAssignorRepository implements AssignorRepository {
         email: assignor.email,
         phone: assignor.phone,
         name: assignor.name,
+        deletedAt: null,
       },
       create: assignor,
     });

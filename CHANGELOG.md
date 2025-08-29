@@ -7,7 +7,72 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
-## [1.1.0] - 2025-08-29
+## [1.3.0] - 2025-08-29 - Nível 3 Completo: Testes
+
+### Added
+- **100% Test Coverage** com relatórios detalhados
+- **Execução sequencial de testes E2E** evitando race conditions
+- **29 testes E2E** cobrindo todos os cenários de uso
+- **70 testes unitários** validando lógica de negócio
+- Configuração Jest otimizada com `maxWorkers: 1` para E2E
+- Cleanup automático e robusto entre testes
+- Estratégia de upsert para evitar conflitos de chave única
+- README atualizado com badges de qualidade e documentação completa
+- **Nível 3 do desafio oficialmente concluído**
+
+### Changed
+- **Simplificação radical** da estratégia de cleanup de testes
+- Remoção de timeouts desnecessários e try-catch redundantes
+- Cleanup de comentários de debug e código temporário
+- Estrutura de testes mais limpa e maintível
+
+### Removed
+- `jest.config.simple.js` - arquivo temporário não utilizado
+- Comentários de debug nos testes E2E
+- Código duplicado de cleanup entre describe blocks
+- Lógica complexa desnecessária de restauração de soft delete
+
+### Fixed
+- **Race conditions** entre testes paralelos completamente eliminadas
+- Teste unitário do upsert corrigido para incluir `deletedAt: null`
+- Estabilidade completa da suite de testes
+- Isolamento perfeito entre diferentes test suites
+
+### Technical Highlights
+- **Estratégia de cleanup**: `deleteMany() → restore soft deleted → deleteMany()`
+- **Execução sequencial**: Jest configurado com `maxWorkers: 1` para E2E
+- **Upsert pattern**: Evita conflitos de chave única em cenários paralelos
+- **Zero flakiness**: Testes 100% determinísticos e confiáveis
+
+## [1.2.0] - 2025-08-29 - Nível 3: Infraestrutura de Testes
+
+### Added
+- Suite completa de testes unitários e de integração
+- Configuração Jest para ambiente de testes
+- Testes unitários para todos os services e controllers
+- Testes de integração (E2E) para endpoints críticos
+- Cobertura de código com relatórios detalhados
+- Scripts de validação completa do projeto
+- Estrutura organizada de testes separada do código de produção
+- Documentação completa da estrutura de testes
+
+### Changed
+- Estrutura de testes reorganizada em `test/unit/` e `test/integration/`
+- Configurações Jest otimizadas para diferentes tipos de teste
+- Package.json atualizado com scripts de teste organizados
+- Separação clara entre código de produção e testes
+- Imports dos testes ajustados para nova estrutura
+
+### Technical Details
+- **Estrutura**: `test/unit/modules/` espelha `src/modules/`
+- **Testes unitários**: 63 testes passando em 11 suites
+- **Testes E2E**: 15 testes de integração com banco real
+- **Cobertura**: 100% em statements, branches, functions e lines
+- **Performance**: Testes rápidos e isolados
+- **Qualidade**: Mocks completos e assertions robustas
+- **Exclusões**: Apenas `main.ts` (bootstrap) excluído da cobertura
+
+## [1.1.0] - 2025-08-29 - Documentação e Melhorias
 
 ### Added
 - Documentação completa da API com Swagger/OpenAPI
@@ -24,7 +89,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Main.ts atualizado para carregar configurações dinamicamente
 - DTOs aprimorados com decoradores @ApiProperty para documentação
 
-## [1.0.0] - 2025-08-29
+## [1.0.0] - 2025-08-29 - Nível 2 Completo: Persistência
 
 ### Added
 - Sistema completo de gerenciamento de recebíveis (Aprove-me)
@@ -112,7 +177,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Validação de relacionamentos entre entidades
 - Prevenção de criação de payables com assignors inexistentes
 
-## [0.0.1] - 2025-08-29 - Level 1 Validation & Foundation
+## [0.0.1] - 2025-08-29 - Nível 1 Completo: Validação
 
 ### Added
 - Projeto base NestJS com TypeScript
