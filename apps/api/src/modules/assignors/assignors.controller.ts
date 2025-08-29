@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { AssignorsService } from './assignors.service';
-import { AssignorDto } from './dto/assignor.dto';
+import { CreateAssignorDto } from './dto/create-assignor.dto';
 import { UpdateAssignorDto } from './dto/update-assignor.dto';
 
 @Controller('integrations')
@@ -8,7 +8,7 @@ export class AssignorsController {
   constructor(private readonly assignorsService: AssignorsService) {}
 
   @Post('assignor')
-  create(@Body() createAssignorDto: AssignorDto) {
+  create(@Body() createAssignorDto: CreateAssignorDto) {
     return this.assignorsService.create(createAssignorDto);
   }
 

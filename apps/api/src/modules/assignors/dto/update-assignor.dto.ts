@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { AssignorDto } from './assignor.dto';
 
-export class UpdateAssignorDto extends PartialType(AssignorDto) {}
+export class UpdateAssignorDto extends PartialType(OmitType(AssignorDto, ['id'] as const)) {}

@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsNumber, IsDateString, IsUUID, ValidateNested, Min } from "class-validator";
-import { AssignorDto } from "./assignor.dto";
+import { AssignorDto } from "../../assignors/dto/assignor.dto";
 import { Type } from "class-transformer";
 
 export class CreatePayableRequestDto {

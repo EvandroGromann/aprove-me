@@ -6,5 +6,4 @@ export abstract class PayableRepository {
   abstract findAllPaginated(skip: number, limit: number): Promise<PayableEntity[]>;
   abstract count(): Promise<number>;
   abstract create(payable: Omit<PayableEntity, 'createdAt' | 'updatedAt' | 'assignor'>): Promise<PayableEntity>;
-  abstract findByIdWithAssignor(id: string): Promise<PayableEntity | null>;
 }

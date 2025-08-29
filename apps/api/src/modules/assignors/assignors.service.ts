@@ -1,19 +1,27 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { AssignorDto } from './dto/assignor.dto';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { CreateAssignorDto } from './dto/create-assignor.dto';
 import { UpdateAssignorDto } from './dto/update-assignor.dto';
+import { AssignorResponseDto } from './dto/assignor-response.dto';
 import { AssignorRepository } from './repositories/assignor.repository';
+import { AssignorEntity } from './entities/assignor.entity';
 
 @Injectable()
 export class AssignorsService {
   constructor(private assignorRepository: AssignorRepository) {}
 
-  async create(createAssignorDto: AssignorDto) {
+  private mapToResponseDto(assignor: AssignorEntity): AssignorResponseDto {
+    const { deletedAt, ...assignorResponse } = assignor;
+    return assignorResponse;
+  }
+
+  async create(createAssignorDto: CreateAssignorDto): Promise<AssignorResponseDto> {
     const existingAssignor = await this.assignorRepository.findById(createAssignorDto.id);
     if (existingAssignor) {
       throw new ConflictException('Cedente com este ID já existe');
     }
 
-    return this.assignorRepository.create(createAssignorDto);
+    const createdAssignor = await this.assignorRepository.create(createAssignorDto);
+    return this.mapToResponseDto(createdAssignor);
   }
 
   async findAll(page: number = 1, limit: number = 10) {
@@ -24,7 +32,7 @@ export class AssignorsService {
     ]);
 
     return {
-      data: assignors,
+      data: assignors.map(assignor => this.mapToResponseDto(assignor)),
       meta: {
         page,
         limit,
@@ -36,22 +44,23 @@ export class AssignorsService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<AssignorResponseDto> {
     const assignor = await this.assignorRepository.findById(id);
     if (!assignor) {
       throw new NotFoundException('Cedente não encontrado');
     }
 
-    return assignor;
+    return this.mapToResponseDto(assignor);
   }
 
-  async update(id: string, updateAssignorDto: UpdateAssignorDto) {
+  async update(id: string, updateAssignorDto: UpdateAssignorDto): Promise<AssignorResponseDto> {
     const existingAssignor = await this.assignorRepository.findById(id);
     if (!existingAssignor) {
       throw new NotFoundException('Cedente não encontrado');
     }
 
-    return this.assignorRepository.update(id, updateAssignorDto);
+    const updatedAssignor = await this.assignorRepository.update(id, updateAssignorDto);
+    return this.mapToResponseDto(updatedAssignor);
   }
 
   async remove(id: string) {
@@ -63,7 +72,8 @@ export class AssignorsService {
     await this.assignorRepository.softDelete(id);
   }
 
-  async restore(id: string) {
-    return this.assignorRepository.restore(id);
+  async restore(id: string): Promise<AssignorResponseDto> {
+    const restoredAssignor = await this.assignorRepository.restore(id);
+    return this.mapToResponseDto(restoredAssignor);
   }
 }
