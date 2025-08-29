@@ -70,7 +70,7 @@ src/
 - **Controllers**: Onde exponho as APIs (com rotas `/integrations/*`)
 
 #### 3. Como Pensei nas Rotas
-- Entendi que `/integrations/*` é só um **prefixo de namespace**, como se fosse `/api`
+- Entendi que `/integrations/*` poderia ser só um **prefixo de namespace**, como se fosse `/api`
 - Cada controller define sua própria responsabilidade
 - Não preciso de um módulo "IntegrationModule" - vejo só como uma convenção de rota
 
