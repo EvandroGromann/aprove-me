@@ -24,15 +24,18 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from './dto';
 import { JwtAuthGuard } from '../../shared/auth/guards/jwt-auth.guard';
+// logger removed from controllers per team decision
 
 @ApiTags('users')
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+  ) {}
 
-  @Post()
+    @Post()
   @ApiOperation({ summary: 'Criar novo usuário' })
   @ApiCreatedResponse({
     description: 'Usuário criado com sucesso',
@@ -42,7 +45,8 @@ export class UsersController {
     description: 'Login já existe',
   })
   async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
-    return this.usersService.create(createUserDto);
+  const result = await this.usersService.create(createUserDto);
+  return result;
   }
 
   @Get()
@@ -52,7 +56,7 @@ export class UsersController {
     type: [UserResponseDto],
   })
   async findAll(): Promise<UserResponseDto[]> {
-    return this.usersService.findAll();
+  return this.usersService.findAll();
   }
 
   @Get(':id')
@@ -65,7 +69,7 @@ export class UsersController {
     description: 'Usuário não encontrado',
   })
   async findOne(@Param('id') id: string): Promise<UserResponseDto> {
-    return this.usersService.findById(id);
+  return this.usersService.findById(id);
   }
 
   @Patch(':id')
@@ -84,7 +88,8 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserResponseDto> {
-    return this.usersService.update(id, updateUserDto);
+  const result = await this.usersService.update(id, updateUserDto);
+  return result;
   }
 
   @Delete(':id')
@@ -97,6 +102,6 @@ export class UsersController {
     description: 'Usuário não encontrado',
   })
   async remove(@Param('id') id: string): Promise<void> {
-    return this.usersService.remove(id);
+  await this.usersService.remove(id);
   }
 }

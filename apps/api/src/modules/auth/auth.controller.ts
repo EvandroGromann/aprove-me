@@ -7,7 +7,9 @@ import { LoginResponseDto } from './dto/login-response.dto';
 @ApiTags('Autenticação')
 @Controller('integrations/auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.OK)

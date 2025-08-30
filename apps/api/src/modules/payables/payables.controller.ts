@@ -59,6 +59,7 @@ export class PayablesController {
   ) {
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
+    
     return this.payablesService.findAll(pageNum, limitNum);
   }
 

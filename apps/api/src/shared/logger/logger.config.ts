@@ -4,11 +4,31 @@ import * as winston from 'winston';
 const { combine, timestamp, printf, colorize, errors, json } = winston.format;
 
 // Custom format for console logging
-const consoleFormat = printf(({ level, message, timestamp, context, trace, ...meta }) => {
-  let log = `${timestamp} [${context || 'Application'}] ${level}: ${message}`;
+const consoleFormat = printf(({ level, message, timestamp, context, trace, traceId, ...meta }) => {
+  let log = `${timestamp}`;
   
-  if (Object.keys(meta).length > 0) {
-    log += ` ${JSON.stringify(meta)}`;
+  if (traceId) {
+    log += ` [${traceId}]`;
+  }
+  
+  log += ` [${context || 'App'}]`;
+  
+  // Voltar a mostrar o texto do level para todos os logs
+  const formattedLevel = level === 'warn' ? 'warning:' : `${level.toLowerCase()}:`;
+  log += ` ${formattedLevel}`;
+  
+  log += ` ${message}`;
+  
+  // Only show relevant metadata in console (not service/version)
+  const relevantMeta = Object.keys(meta).reduce((acc, key) => {
+    if (!['service', 'version'].includes(key)) {
+      acc[key] = meta[key];
+    }
+    return acc;
+  }, {});
+  
+  if (Object.keys(relevantMeta).length > 0) {
+    log += ` ${JSON.stringify(relevantMeta)}`;
   }
   
   if (trace) {

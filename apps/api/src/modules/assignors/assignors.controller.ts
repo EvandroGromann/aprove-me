@@ -11,7 +11,9 @@ import { JwtAuthGuard } from '../../shared/auth/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class AssignorsController {
-  constructor(private readonly assignorsService: AssignorsService) {}
+  constructor(
+    private readonly assignorsService: AssignorsService,
+  ) {}
 
   @Post('assignor')
   @ApiOperation({ summary: 'Criar um novo cedente' })
@@ -22,7 +24,7 @@ export class AssignorsController {
   })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 409, description: 'Cedente já existe' })
-  create(@Body() createAssignorDto: CreateAssignorDto): Promise<AssignorResponseDto> {
+  async create(@Body() createAssignorDto: CreateAssignorDto): Promise<AssignorResponseDto> {
     return this.assignorsService.create(createAssignorDto);
   }
 
@@ -54,12 +56,13 @@ export class AssignorsController {
       }
     }
   })
-  findAll(
+  async findAll(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
   ) {
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
+    
     return this.assignorsService.findAll(pageNum, limitNum);
   }
 
@@ -72,7 +75,7 @@ export class AssignorsController {
     type: AssignorResponseDto 
   })
   @ApiResponse({ status: 404, description: 'Cedente não encontrado' })
-  findOne(@Param('id') id: string): Promise<AssignorResponseDto> {
+  async findOne(@Param('id') id: string): Promise<AssignorResponseDto> {
     return this.assignorsService.findOne(id);
   }
 
@@ -86,7 +89,7 @@ export class AssignorsController {
   })
   @ApiResponse({ status: 404, description: 'Cedente não encontrado' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  update(
+  async update(
     @Param('id') id: string, 
     @Body() updateAssignorDto: UpdateAssignorDto
   ): Promise<AssignorResponseDto> {
@@ -98,7 +101,7 @@ export class AssignorsController {
   @ApiParam({ name: 'id', description: 'UUID do cedente' })
   @ApiResponse({ status: 200, description: 'Cedente removido com sucesso' })
   @ApiResponse({ status: 404, description: 'Cedente não encontrado' })
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.assignorsService.remove(id);
   }
 
@@ -111,7 +114,7 @@ export class AssignorsController {
     type: AssignorResponseDto 
   })
   @ApiResponse({ status: 404, description: 'Cedente não encontrado' })
-  restore(@Param('id') id: string): Promise<AssignorResponseDto> {
+  async restore(@Param('id') id: string): Promise<AssignorResponseDto> {
     return this.assignorsService.restore(id);
   }
 }

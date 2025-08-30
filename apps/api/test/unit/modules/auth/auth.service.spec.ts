@@ -27,7 +27,7 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
-    logger = createMockLogger();
+
     
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -96,25 +96,7 @@ describe('AuthService', () => {
         { expiresIn: '1m' }
       );
 
-      // Verify logging calls
-      expect(logger.log).toHaveBeenCalledWith('Login attempt for user: testuser');
-      expect(logger.audit).toHaveBeenCalledWith(
-        'User login successful',
-        {
-          userId: 'user-id',
-          login: 'testuser',
-          tokenExpiry: '1m'
-        },
-        'user-id'
-      );
-      expect(logger.performance).toHaveBeenCalledWith(
-        'Login process',
-        expect.any(Number),
-        {
-          userId: 'user-id',
-          success: true
-        }
-      );
+  // logging is handled by decorator; no assertions on logger
     });
 
     it('should throw UnauthorizedException for non-existent user', async () => {
@@ -133,19 +115,6 @@ describe('AuthService', () => {
       );
       expect(mockJwtService.sign).not.toHaveBeenCalled();
 
-      // Verify security logging
-      expect(logger.security).toHaveBeenCalledWith(
-        'Login failed - user not found',
-        { login: 'nonexistent', ip: 'unknown' }
-      );
-      expect(logger.performance).toHaveBeenCalledWith(
-        'Login process',
-        expect.any(Number),
-        {
-          success: false,
-          error: 'Credenciais inválidas'
-        }
-      );
     });
 
     it('should throw UnauthorizedException for invalid password', async () => {

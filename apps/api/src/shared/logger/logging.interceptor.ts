@@ -12,103 +12,64 @@ import { throwError } from 'rxjs';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  constructor(private readonly logger: CustomLogger) {
-    this.logger.setContext('HTTP');
-  }
+  private sensitiveFields = ['password', 'access_token', 'authorization', 'secret', 'key'];
+
+  constructor(private readonly logger: CustomLogger) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const startTime = Date.now();
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
-    const { method, url, ip, headers } = request;
-    const userAgent = headers['user-agent'];
+    const handler = context.getHandler();
+    const controller = context.getClass();
     
-    // Extract user info if available
+    const { method, url, body, query, params } = request;
     const user = (request as any).user;
-    const userId = user?.id || user?.sub;
     
-    // Log incoming request
-    this.logger.log(`Incoming ${method} ${url}`, 'HTTP', {
-      method,
-      url,
-      ip,
-      userAgent,
-      userId,
-      requestId: this.generateRequestId()
-    });
+    // Auto-extract controller context
+    const contextName = controller.name; // Usar nome completo da classe
+    this.logger.setContext(contextName);
+    
+    // Auto-log incoming request - mais simples, sem dados duplicados do HTTP
+    this.logger.info(`${handler.name}`, contextName);
 
     return next.handle().pipe(
       tap((data) => {
         const duration = Date.now() - startTime;
-        const { statusCode } = response;
         
-        // Log successful response
-        this.logger.performance(`${method} ${url}`, duration, {
-          statusCode,
-          responseSize: JSON.stringify(data).length,
-          userId
+        // Auto-log successful operation - mais simples
+        this.logger.info(`${handler.name} completed (${duration}ms)`, contextName, {
+          duration,
+          statusCode: response.statusCode,
+          responseType: Array.isArray(data) ? 'array' : typeof data
         });
-
-        // Log business events for important operations
-        if (this.isBusinessOperation(method, url)) {
-          this.logger.business(`${method} ${url} completed`, {
-            statusCode,
-            duration,
-            userId,
-            endpoint: url
-          });
-        }
       }),
       catchError((error) => {
         const duration = Date.now() - startTime;
         
-        // Log error response
-        this.logger.error(`${method} ${url} failed`, error.stack, 'HTTP', {
-          method,
-          url,
-          statusCode: error.status || 500,
+        // Auto-log error
+        this.logger.error(`${handler.name} failed (${duration}ms): ${error.message}`, error.stack, contextName, {
           duration,
-          userId,
-          errorMessage: error.message,
-          errorName: error.name
+          statusCode: error.status || 500,
+          errorType: error.constructor.name
         });
-
-        // Log security events for authentication/authorization failures
-        if (this.isSecurityError(error)) {
-          this.logger.security('Authentication/Authorization failure', {
-            method,
-            url,
-            ip,
-            userAgent,
-            userId,
-            errorStatus: error.status,
-            errorMessage: error.message
-          });
-        }
 
         return throwError(() => error);
       })
     );
   }
 
-  private generateRequestId(): string {
-    return Math.random().toString(36).substring(2, 15);
-  }
-
-  private isBusinessOperation(method: string, url: string): boolean {
-    const businessEndpoints = [
-      '/payables',
-      '/assignors', 
-      '/users',
-      '/auth/login',
-      '/auth/register'
-    ];
+  private sanitizeData(data: any): any {
+    if (!data || typeof data !== 'object') return data;
     
-    return businessEndpoints.some(endpoint => url.includes(endpoint)) && 
-           ['POST', 'PUT', 'DELETE'].includes(method);
-  }
-
-  private isSecurityError(error: any): boolean {
-    return error.status === 401 || error.status === 403;
+    const sanitized = { ...data };
+    
+    for (const field of this.sensitiveFields) {
+      if (field in sanitized) {
+        sanitized[field] = '***';
+      }
+    }
+    
+    return sanitized;
   }
 }

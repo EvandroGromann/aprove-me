@@ -6,7 +6,7 @@ import { join } from 'path';
 import { readFileSync } from 'fs';
 import { AppModule } from './app.module';
 import { CustomLogger } from './shared/logger/custom-logger.service';
-import { LoggingInterceptor } from './shared/logger/logging.interceptor';
+import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -18,9 +18,9 @@ async function bootstrap() {
   logger.setContext('Bootstrap');
   app.useLogger(logger);
   
-  // Get logging interceptor instance
-  const loggingInterceptor = await app.resolve(LoggingInterceptor);
-  app.useGlobalInterceptors(loggingInterceptor);
+  // Register global exception filter
+  const exceptionFilter = new HttpExceptionFilter(logger);
+  app.useGlobalFilters(exceptionFilter);
   
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

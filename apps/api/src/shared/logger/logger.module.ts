@@ -2,7 +2,8 @@ import { Global, Module } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
 import { loggerConfig } from './logger.config';
 import { CustomLogger } from './custom-logger.service';
-import { LoggingInterceptor } from './logging.interceptor';
+import { RequestLoggingMiddleware } from './request-logging.middleware';
+import { RequestContextService } from '../context/request-context.service';
 
 @Global()
 @Module({
@@ -11,11 +12,13 @@ import { LoggingInterceptor } from './logging.interceptor';
   ],
   providers: [
     CustomLogger,
-    LoggingInterceptor
+    RequestLoggingMiddleware,
+    RequestContextService
   ],
   exports: [
     CustomLogger,
-    LoggingInterceptor,
+    RequestLoggingMiddleware,
+    RequestContextService,
     WinstonModule
   ]
 })
