@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.npmrc
+dist
+coverage
+logs
+.env
+.DS_Store
+*.db
+prisma/dev.db
+.vscode
+.idea

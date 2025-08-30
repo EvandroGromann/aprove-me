@@ -1,0 +1,20 @@
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: aprove-me-api
+    environment:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - DATABASE_URL=file:/app/prisma/data/dev.db
+    ports:
+      - "3000:3000"
+    volumes:
+      - api_logs:/app/logs
+      - api_db:/app/prisma/data
+    restart: unless-stopped
+
+volumes:
+  api_logs:
+  api_db:

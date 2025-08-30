@@ -31,6 +31,22 @@ async function bootstrap() {
   const configPath = join(__dirname, '..', 'api-info.json');
   const apiConfig = JSON.parse(readFileSync(configPath, 'utf8'));
 
+  // Resolve version dynamically (prefer package.json, fallback to api-info.json)
+  let resolvedVersion = apiConfig.version as string;
+  try {
+    const pkgPath = join(__dirname, '..', '..', 'package.json');
+    const pkgJson = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    if (pkgJson?.version) {
+      resolvedVersion = pkgJson.version;
+    } else if (process.env.npm_package_version) {
+      resolvedVersion = process.env.npm_package_version;
+    }
+  } catch {
+    if (process.env.npm_package_version) {
+      resolvedVersion = process.env.npm_package_version;
+    }
+  }
+
   app.useStaticAssets(join(__dirname, '..', 'assets'), {
     prefix: '/config/',
   });
@@ -42,7 +58,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle(apiConfig.name)
     .setDescription(apiConfig.description)
-    .setVersion(apiConfig.version)
+    .setVersion(resolvedVersion)
     .setContact(apiConfig.contact.name, apiConfig.contact.url, apiConfig.contact.email)
     .setLicense(apiConfig.license.name, apiConfig.license.url)
     .addServer(apiConfig.servers[0].url, apiConfig.servers[0].description)
@@ -79,6 +95,6 @@ async function bootstrap() {
   await app.listen(3000);
   logger.log('🚀 Server running on http://localhost:3000');
   logger.log('📚 API Documentation: http://localhost:3000/api/docs');
-  logger.log(`📋 API Info: ${apiConfig.name} v${apiConfig.version}`);
+  logger.log(`📋 API Info: ${apiConfig.name} v${resolvedVersion}`);
 }
 bootstrap();

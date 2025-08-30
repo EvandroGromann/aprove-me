@@ -1,15 +1,15 @@
 {
   "name": "aprove-me-api",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "API para gestão de pagáveis com sistema de permissões - Desafio Bankme",
-  "main": "dist/main.js",
+  "main": "dist/src/main.js",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+  "start:prod": "node dist/src/main.js",
     "dev": "nest start --watch",
     "dev:watch": "nodemon --exec ts-node src/main.ts",
     "test": "jest",

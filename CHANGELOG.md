@@ -7,6 +7,41 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.6.0] - 2025-08-30 - Infra e Docker concluídos
+
+### Added
+- Dockerfile multi-stage para API, docker-compose com volumes e variáveis
+- Documentação de execução com Docker/Compose no README
+- `tsconfig.build.json` e configuração do Nest para build de produção
+
+### Changed
+- Entrypoint atualizado para `dist/src/main.js`
+- Compose usando `DATABASE_URL=file:/app/prisma/data/dev.db` e montando somente `/app/prisma/data`
+
+### Fixed
+- Erro de build no Docker por compilar testes
+- Loop de restart por `Cannot find module '/app/dist/main.js'`
+- Volume do Compose mascarando diretório do Prisma
+
+## [1.5.1] - 2025-08-30 - Logging, Cobertura 100% 
+
+### Added
+- Testes unitários abrangentes para logger (decorator, middleware, interceptors, filter)
+- Builder exportado `buildConsoleFormat` para testar formatação sem acoplamento
+- Testes de configuração por ambiente para `logger.config.ts` (versão e level do Console)
+- Infra de containerização: `apps/api/Dockerfile`, `docker-compose.yaml`, `.dockerignore`
+- Documentação de Docker/Compose no README; status do Nível 6 concluído
+
+### Changed
+- `@Log()` refatorado: helper para payload de saída que evita espalhar arrays/valores
+- Sanitização preserva o prototype do objeto (incluindo null) e mascara campos sensíveis
+- `RequestLoggingMiddleware` robustecido: fallback seguro quando `toString` não existe/lança
+- `SimpleLoggingInterceptor` coberto e validado (somente log de entrada)
+
+### Fixed
+- Logs de testes não escrevem em disco nem poluem o console: transports do Winston mockados no setup
+- Cobertura total de ramificações específicas (ex.: status fallback 500, responseType array)
+
 ## [1.5.0] - 2025-08-29 - Nível 5 Completo: Sistema de Permissões
 
 ### 🔐 Added

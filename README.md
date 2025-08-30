@@ -62,6 +62,7 @@ apps/
 - **Class Validator** - Validação robusta de DTOs
 - **Swagger/OpenAPI** - Documentação interativa da API
 - **Jest** - Framework de testes com 100% de cobertura
+- **Logger** - Logs automaticos com decorators
 
 ### Testes
 - **120+ testes unitários** - Cobertura completa da lógica de negócio
@@ -231,14 +232,36 @@ npm run lint
 - **120+ testes unitários** validando a lógica de negócio
 - **Zero race conditions** com execução sequencial
 
-## 📈 Status de Implementação
+## � Docker e Execução com Compose
+
+Executar a API em ambiente conteinerizado.
+
+Pré-requisitos:
+- Docker Desktop 4+
+
+Comandos principais:
+- Subir em modo produção: docker compose up -d --build
+- Ver logs: docker compose logs -f api
+- Parar: docker compose down
+- Parar e limpar volumes (DB/logs): docker compose down -v
+
+Detalhes da orquestração:
+- Build usando `apps/api/Dockerfile` (multi-stage, deps → build → prod)
+- Porta exposta: 3000 (http://localhost:3000)
+- Documentação Swagger: http://localhost:3000/api/docs
+- Variáveis padrão: NODE_ENV=production, LOG_LEVEL=info, DATABASE_URL=file:/app/prisma/dev.db
+- Volumes: `api_logs` (logs em /app/logs) e `api_db` (SQLite em /app/prisma)
+- Migrações Prisma: aplicadas automaticamente no start (migrate deploy)
+
+## �📈 Status de Implementação
 
 - ✅ **Nível 1**: Validação de dados rigorosa
 - ✅ **Nível 2**: Persistência completa com Prisma
 - ✅ **Nível 3**: Testes unitários com 100% cobertura
 - ✅ **Nível 4**: Autenticação JWT completa
 - ✅ **Nível 5**: Sistema de permissões com banco de dados
-- 🚧 **Próximos**: Nível 6 em diante conforme especificação do desafio
+- ✅ **Nível 6**: Infra e Documentação (Dockerfile, docker-compose, README)
+- 🚧 **Próximos**: Nível 7 em diante conforme especificação do desafio
 
 ## 🎯 Destaques Técnicos
 
