@@ -3,40 +3,43 @@ import * as winston from 'winston';
 
 const { combine, timestamp, printf, colorize, errors, json } = winston.format;
 
-// Custom format for console logging
-const consoleFormat = printf(({ level, message, timestamp, context, trace, traceId, ...meta }) => {
+// Função exportada para permitir teste do formatter sem acoplar ao colorize
+export const buildConsoleFormat = () => printf(({ level, message, timestamp, context, trace, traceId, ...meta }) => {
   let log = `${timestamp}`;
-  
+
   if (traceId) {
     log += ` [${traceId}]`;
   }
-  
+
   log += ` [${context || 'App'}]`;
-  
+
   // Voltar a mostrar o texto do level para todos os logs
-  const formattedLevel = level === 'warn' ? 'warning:' : `${level.toLowerCase()}:`;
+  const formattedLevel = level === 'warn' ? 'warning:' : `${String(level).toLowerCase()}:`;
   log += ` ${formattedLevel}`;
-  
+
   log += ` ${message}`;
-  
+
   // Only show relevant metadata in console (not service/version)
-  const relevantMeta = Object.keys(meta).reduce((acc, key) => {
+  const relevantMeta = Object.keys(meta).reduce((acc: Record<string, unknown>, key) => {
     if (!['service', 'version'].includes(key)) {
-      acc[key] = meta[key];
+      acc[key] = (meta as any)[key];
     }
     return acc;
-  }, {});
-  
+  }, {} as Record<string, unknown>);
+
   if (Object.keys(relevantMeta).length > 0) {
     log += ` ${JSON.stringify(relevantMeta)}`;
   }
-  
+
   if (trace) {
     log += `\n${trace}`;
   }
-  
+
   return log;
 });
+
+// Custom format para console usa o builder acima
+const consoleFormat = buildConsoleFormat();
 
 // Custom format for file logging
 const fileFormat = combine(

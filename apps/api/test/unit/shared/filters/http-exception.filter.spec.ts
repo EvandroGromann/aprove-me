@@ -20,4 +20,26 @@ describe('HttpExceptionFilter', () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalled();
   });
+
+  it('does not set traceId when it is missing and still returns response', () => {
+    const logger = { setContext: jest.fn(), setTraceId: jest.fn() } as any;
+    const filter = new HttpExceptionFilter(logger);
+
+    const exception = new (HttpException as any)({ err: true }, 500);
+    const json = jest.fn();
+    const status = jest.fn(() => ({ json }));
+
+    const host: any = {
+      switchToHttp: () => ({
+        getResponse: () => ({ status }),
+        getRequest: () => ({})
+      })
+    };
+
+    filter.catch(exception, host);
+
+    expect(logger.setTraceId).not.toHaveBeenCalled();
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith({ err: true });
+  });
 });

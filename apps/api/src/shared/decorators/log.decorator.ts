@@ -15,22 +15,39 @@ function sanitizeSensitiveData(obj: any): any {
     return obj.map(item => sanitizeSensitiveData(item));
   }
 
-  const sanitized = { ...obj };
-  
-  for (const key in sanitized) {
-    if (sanitized.hasOwnProperty(key)) {
-      const lowerKey = key.toLowerCase();
-      const isSensitive = SENSITIVE_FIELDS.some(field => lowerKey.includes(field));
-      
-      if (isSensitive) {
-        sanitized[key] = '***';
-      } else if (typeof sanitized[key] === 'object') {
-        sanitized[key] = sanitizeSensitiveData(sanitized[key]);
-      }
+  // Preserve original prototype (including null) instead of spreading,
+  // so downstream logic can distinguish plain objects and null-proto objects.
+  const proto = Object.getPrototypeOf(obj);
+  const sanitized: any = Object.create(proto);
+
+  for (const key of Object.keys(obj)) {
+    const lowerKey = key.toLowerCase();
+    const isSensitive = SENSITIVE_FIELDS.some(field => lowerKey.includes(field));
+    const value = (obj as any)[key];
+
+    if (isSensitive) {
+      sanitized[key] = '***';
+    } else if (typeof value === 'object') {
+      sanitized[key] = sanitizeSensitiveData(value);
+    } else {
+      sanitized[key] = value;
     }
   }
-  
+
   return sanitized;
+}
+
+function isPlainObject(value: any): value is Record<string, any> {
+  if (value === null || typeof value !== 'object') return false;
+  if (Array.isArray(value)) return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+function buildOutputPayload(sanitizedResult: any): Record<string, any> {
+  return isPlainObject(sanitizedResult)
+    ? sanitizedResult
+    : { value: sanitizedResult };
 }
 
 const fallbackLogger = winston.createLogger({
@@ -128,21 +145,13 @@ export function Log(options?: string | LogOptions) {
             instanceLogger.info(`${message} (${duration}ms) output:`, {
               context: className,
               traceId,
-              ...(
-                typeof sanitizedResult === 'object' && sanitizedResult !== null
-                  ? sanitizedResult
-                  : { value: sanitizedResult }
-              )
+              ...buildOutputPayload(sanitizedResult)
             } as any);
           } else {
             instanceLogger.info(`${message} output:`, {
               context: className,
               traceId,
-              ...(
-                typeof sanitizedResult === 'object' && sanitizedResult !== null
-                  ? sanitizedResult
-                  : { value: sanitizedResult }
-              )
+              ...buildOutputPayload(sanitizedResult)
             } as any);
           }
         }

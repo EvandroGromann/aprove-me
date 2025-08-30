@@ -80,7 +80,14 @@ export class RequestLoggingMiddleware implements NestMiddleware {
             metadata = { msg: body.toString() };
           }
         } catch (e) {
-          metadata = { msg: body?.toString() || 'Unknown response' };
+          let msg: string | undefined;
+          try {
+            const maybeToString = (body as any)?.toString;
+            msg = typeof maybeToString === 'function' ? maybeToString.call(body) : undefined;
+          } catch {
+            msg = undefined;
+          }
+          metadata = { msg: msg || 'Unknown response' };
         }
       }
       

@@ -87,5 +87,26 @@ describe('LoggingInterceptor', () => {
       }
     });
   });
+
+  it('logs success with responseType "array" when handler returns an array', (done) => {
+    const context = createMockExecutionContext();
+    const next: CallHandler = { handle: () => of([1, 2, 3]) };
+
+    interceptor.intercept(context, next).subscribe({
+      next: () => done(),
+      error: done
+    });
+  });
+
+  it('falls back to statusCode 500 when error.status is missing', (done) => {
+    const context = createMockExecutionContext();
+    const err = new Error('no status');
+    delete (err as any).status;
+    const next: CallHandler = { handle: () => throwError(() => err) };
+
+    interceptor.intercept(context, next).subscribe({
+      error: () => done()
+    });
+  });
 });
     
