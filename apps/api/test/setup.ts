@@ -66,6 +66,66 @@ jest.mock('@prisma/client', () => ({
   })),
 }));
 
+// Mock Bull to avoid real Redis connections during unit tests
+jest.mock('@nestjs/bull', () => {
+  const { Inject } = require('@nestjs/common');
+  const makeDummyQueue = () => ({
+    add: jest.fn(),
+    addBulk: jest.fn(),
+    close: jest.fn(),
+    client: {
+      hset: jest.fn().mockResolvedValue('OK'),
+      hincrby: jest.fn().mockResolvedValue(1),
+      hmget: jest.fn().mockResolvedValue(['0', '0', '0', '']),
+      set: jest.fn().mockResolvedValue('OK'),
+      expire: jest.fn().mockResolvedValue(1),
+    },
+  });
+
+  class BullTestingModule {}
+
+  const BullModule = {
+    forRoot: () => ({ module: BullTestingModule, providers: [], exports: [] }),
+    registerQueue: (...queues: Array<{ name: string }>) => {
+      const providers = queues.map((q) => ({
+        provide: `BullQueue_${q.name}`,
+        useValue: makeDummyQueue(),
+      }));
+      return { module: BullTestingModule, providers, exports: providers };
+    },
+  };
+
+  const getQueueToken = (name: string) => `BullQueue_${name}`;
+  const InjectQueue = (name: string) => Inject(getQueueToken(name));
+  const Processor = (..._args: any[]) => (target: any) => target;
+  const Process = (..._args: any[]) => (target: any, key: string, descriptor: PropertyDescriptor) => descriptor;
+
+  return { BullModule, InjectQueue, Processor, Process, getQueueToken };
+});
+
+// Mock nodemailer to avoid opening SMTP connections in unit tests
+jest.mock('nodemailer', () => ({
+  __esModule: true,
+  default: {
+    createTransport: jest.fn(() => ({
+      sendMail: jest.fn().mockResolvedValue({ messageId: 'test' }),
+      close: jest.fn(),
+    })),
+  },
+  createTransport: jest.fn(() => ({
+    sendMail: jest.fn().mockResolvedValue({ messageId: 'test' }),
+    close: jest.fn(),
+  })),
+}));
+
+// Mock 'bull' library to avoid importing real implementation during unit tests
+jest.mock('bull', () => ({
+  __esModule: true,
+  default: class BullQueueMock {},
+  Job: class JobMock {},
+  Queue: class QueueMock {},
+}));
+
 beforeEach(() => {
   jest.clearAllMocks();
 });

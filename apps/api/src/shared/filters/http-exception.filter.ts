@@ -15,16 +15,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
 
-    // Extrair traceId da request se existir
     const traceId = (request as any).traceId;
     if (traceId) {
       this.logger.setTraceId(traceId);
     }
 
-    // Não logar aqui - será capturado pelo middleware de response
-    // que terá informações mais completas incluindo duração
-
-    // Responder com o erro original
     response.status(status).json(exceptionResponse);
   }
 }

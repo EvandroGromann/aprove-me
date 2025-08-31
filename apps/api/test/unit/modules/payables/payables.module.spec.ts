@@ -38,4 +38,10 @@ describe('PayablesModule', () => {
     expect(repository).toBeDefined();
     expect(repository).toBeInstanceOf(PrismaPayableRepository);
   });
+
+  afterAll(async () => {
+    if (module) {
+      await module.close();
+    }
+  });
 });

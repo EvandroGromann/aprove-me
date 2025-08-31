@@ -4,14 +4,18 @@ import { PayableResponseDto } from './dto/payable-response.dto';
 import { PayableRepository } from './repositories/payable.repository';
 import { AssignorRepository } from '../assignors/repositories/assignor.repository';
 import { PayableEntity } from './entities/payable.entity';
-import { CustomLogger } from '../../shared/logger/custom-logger.service';
 import { Log } from '../../shared/decorators/log.decorator';
+import { v4 as uuidv4 } from 'uuid';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { RequestContextService } from '../../shared/context/request-context.service';
 
 @Injectable()
 export class PayablesService {
   constructor(
     private assignorRepository: AssignorRepository,
-    private payableRepository: PayableRepository
+  private payableRepository: PayableRepository,
+  @InjectQueue('payable-batch') private readonly queue: Queue,
   ) {}
 
   private mapToResponseDto(payable: PayableEntity): PayableResponseDto {
@@ -29,6 +33,41 @@ export class PayablesService {
       createdAt: payable.createdAt,
       updatedAt: payable.updatedAt,
     };
+  }
+
+  @Log()
+  async enqueueBatch(items: CreatePayableRequestDto[], notifyTo: string): Promise<{ batchId: string }>{
+    const traceId = RequestContextService.getTraceId();
+    const batchId = traceId || uuidv4();
+    const jobs = items.map((item) => ({
+      name: 'payable' as const,
+      data: { batchId, item },
+      opts: {
+        jobId: `${batchId}:${item.id}`,
+        removeOnComplete: true,
+        removeOnFail: false,
+      },
+    }));
+
+    await (this.queue as any).addBulk(jobs);
+
+    try {
+      const client = await (this.queue as any).client;
+      const key = `batch:payable:${batchId}`;
+  await client.hset(
+        key,
+        'total', String(items.length),
+        'completed', '0',
+        'failed', '0',
+        'notifyTo', notifyTo,
+        'createdAt', new Date().toISOString(),
+      );
+      
+      await client.expire(key, 60 * 60 * 24 * 7);
+    } catch (err) {
+      // não bloquear o fluxo se o tracker falhar; logs ocorrerão via interceptors
+    }
+    return { batchId };
   }
 
   @Log()

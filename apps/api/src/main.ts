@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -10,15 +11,13 @@ import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    bufferLogs: true, // Buffer logs until logger is attached
+    bufferLogs: true
   });
   
-  // Get custom logger instance
   const logger = await app.resolve(CustomLogger);
   logger.setContext('Bootstrap');
   app.useLogger(logger);
   
-  // Register global exception filter
   const exceptionFilter = new HttpExceptionFilter(logger);
   app.useGlobalFilters(exceptionFilter);
   
@@ -31,7 +30,6 @@ async function bootstrap() {
   const configPath = join(__dirname, '..', 'api-info.json');
   const apiConfig = JSON.parse(readFileSync(configPath, 'utf8'));
 
-  // Resolve version dynamically (prefer package.json, fallback to api-info.json)
   let resolvedVersion = apiConfig.version as string;
   try {
     const pkgPath = join(__dirname, '..', '..', 'package.json');
@@ -97,4 +95,5 @@ async function bootstrap() {
   logger.log('📚 API Documentation: http://localhost:3000/api/docs');
   logger.log(`📋 API Info: ${apiConfig.name} v${resolvedVersion}`);
 }
+
 bootstrap();

@@ -42,4 +42,10 @@ describe('AppModule', () => {
     expect(apply).toHaveBeenCalledWith(RequestLoggingMiddleware);
     expect(forRoutes).toHaveBeenCalledWith('*');
   });
+
+  afterAll(async () => {
+    if (module) {
+      await module.close();
+    }
+  });
 });

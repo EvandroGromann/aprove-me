@@ -5,9 +5,10 @@ describe('LoggerConfig', () => {
   it('should have correct default configuration', () => {
     expect(loggerConfig).toBeDefined();
     expect(loggerConfig.level).toBe('info');
+    const expectedVersion = process.env.npm_package_version || '1.5.0';
     expect(loggerConfig.defaultMeta).toEqual({
       service: 'aprove-me-api',
-      version: '1.5.0'
+      version: expectedVersion,
     });
   });
 

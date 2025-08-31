@@ -7,11 +7,21 @@ import { CreatePayableRequestDto } from '../../../../src/modules/payables/dto/cr
 import { PayableEntity } from '../../../../src/modules/payables/entities/payable.entity';
 import { AssignorEntity } from '../../../../src/modules/assignors/entities/assignor.entity';
 import { mockLoggerProvider } from '../../../helpers/logger.helper';
+import { getQueueToken } from '@nestjs/bull';
+import { RequestContextService } from '../../../../src/shared/context/request-context.service';
+jest.mock('uuid', () => ({ v4: () => 'uuid-mock-123' }));
 
 describe('PayablesService', () => {
   let service: PayablesService;
   let payableRepository: jest.Mocked<PayableRepository>;
   let assignorRepository: jest.Mocked<AssignorRepository>;
+  const mockQueue = {
+    addBulk: jest.fn().mockResolvedValue(undefined),
+    client: {
+      hset: jest.fn().mockResolvedValue('OK'),
+      expire: jest.fn().mockResolvedValue(1),
+    },
+  } as any;
 
   const mockAssignor: AssignorEntity = {
     id: '550e8400-e29b-41d4-a716-446655440000',
@@ -66,6 +76,10 @@ describe('PayablesService', () => {
           provide: AssignorRepository,
           useValue: mockAssignorRepository,
         },
+        {
+          provide: getQueueToken('payable-batch'),
+          useValue: mockQueue,
+        },
         mockLoggerProvider,
       ],
     }).compile();
@@ -77,6 +91,63 @@ describe('PayablesService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('enqueueBatch', () => {
+    it('deve publicar um job por item e usar o traceId como batchId', async () => {
+      jest.spyOn(RequestContextService, 'getTraceId').mockReturnValue('trace-ctx-123');
+      const items: CreatePayableRequestDto[] = [
+        {
+          id: 'id-1',
+          value: 100,
+          emissionDate: '2025-08-30T00:00:00.000Z',
+          assignor: { id: 'a1', document: 'doc', email: 'e@e.com', phone: '1', name: 'n' },
+        },
+        {
+          id: 'id-2',
+          value: 200,
+          emissionDate: '2025-08-30T00:00:00.000Z',
+          assignor: { id: 'a2', document: 'doc', email: 'e@e.com', phone: '1', name: 'n' },
+        },
+      ];
+
+      const result = await service.enqueueBatch(items, 'ops@example.com');
+
+      expect(result.batchId).toBe('trace-ctx-123');
+      expect(mockQueue.addBulk).toHaveBeenCalledTimes(1);
+      const jobsArg = mockQueue.addBulk.mock.calls[0][0];
+      expect(jobsArg).toHaveLength(2);
+      expect(jobsArg[0]).toMatchObject({
+        name: 'payable',
+        data: { batchId: 'trace-ctx-123', item: items[0] },
+        opts: { jobId: 'trace-ctx-123:id-1' },
+      });
+      expect(jobsArg[1]).toMatchObject({
+        name: 'payable',
+        data: { batchId: 'trace-ctx-123', item: items[1] },
+        opts: { jobId: 'trace-ctx-123:id-2' },
+      });
+
+      expect(mockQueue.client.hset).toHaveBeenCalled();
+      const key = mockQueue.client.hset.mock.calls[0][0];
+      expect(key).toBe('batch:payable:trace-ctx-123');
+    });
+
+    it('deve usar uuid quando não houver traceId', async () => {
+      jest.spyOn(RequestContextService, 'getTraceId').mockReturnValue(undefined);
+      const items: CreatePayableRequestDto[] = [
+        {
+          id: 'idx',
+          value: 100,
+          emissionDate: '2025-08-30T00:00:00.000Z',
+          assignor: { id: 'ax', document: 'doc', email: 'e@e.com', phone: '1', name: 'n' },
+        },
+      ];
+      const result = await service.enqueueBatch(items, 'ops@example.com');
+      expect(result.batchId).toBe('uuid-mock-123');
+      const jobsArg = mockQueue.addBulk.mock.calls.pop()[0];
+      expect(jobsArg[0].opts.jobId).toBe('uuid-mock-123:idx');
+    });
   });
 
   describe('create', () => {

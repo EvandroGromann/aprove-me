@@ -58,5 +58,12 @@ describe('PrismaModule', () => {
     const testService = exportedModule.get('TEST_SERVICE');
     expect(testService.prismaService).toBeDefined();
     expect(typeof testService.prismaService.onModuleInit).toBe('function');
+    await exportedModule.close();
+  });
+
+  afterAll(async () => {
+    if (module) {
+      await module.close();
+    }
   });
 });

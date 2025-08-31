@@ -15,8 +15,6 @@ async function main() {
       password: hashedPassword,
     },
   });
-
-  console.log('Usuário padrão criado:', user);
 }
 
 main()

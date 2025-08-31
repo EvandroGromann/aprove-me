@@ -23,9 +23,10 @@ jest.mock('@prisma/client', () => ({
 
 describe('PrismaService', () => {
   let service: PrismaService;
+  let module: TestingModule;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [PrismaService],
     }).compile();
 
@@ -52,5 +53,11 @@ describe('PrismaService', () => {
       
       connectSpy.mockRestore();
     });
+  });
+
+  afterAll(async () => {
+    if (module) {
+      await module.close();
+    }
   });
 });

@@ -7,6 +7,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.7.0] - 2025-08-31 - Nível 7: Lotes, Observabilidade e Notificações
+
+### Added
+- Processamento de lotes com `@nestjs/bull` (Bull v4), publicando um job por item (`payable`) na fila `payable-batch`
+- Rastreador de progresso em Redis por lote (`batch:payable:<batchId>`) com campos `total`, `completed`, `failed`, `notifyTo` e `notified`
+- Lock de notificação por lote para evitar envio duplicado de email
+- Propagação de `traceId` para jobs e logs do worker, facilitando a rastreabilidade ponta-a-ponta
+- `EmailService` via Nodemailer (SMTP)
+- Testes unitários cobrindo: `EmailService` (construtor e from fallback), DTO `@Type` de batch, retorno `{ batchId }` no controller, e ramos do consumidor (parseInt fallback, notifyTo falsy, warn em erro de finalize-check)
+
 ## [1.6.0] - 2025-08-30 - Infra e Docker concluídos
 
 ### Added
@@ -97,8 +107,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - **Swagger atualizado** com endpoints de usuários
 - **Guias de autenticação** atualizados para novo sistema
 
----
-
 ## [1.4.1] - 2025-08-29 - Correções e Melhorias de Estrutura
 
 ### Fixed
@@ -117,23 +125,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [1.4.1] - 2025-08-29
 
-### 🔧 Fixed
+### Fixed
 - Corrigida estrutura de testes movendo `src/test/setup.ts` para `test/setup.ts`
 - Corrigidos mocks do PrismaClient para permitir herança adequada do PrismaService
 - Removidos todos os comentários do código conforme solicitado
 - Corrigida configuração do Jest para referenciar setup correto
 
-### ✅ Added
+### Added
 - Criado teste unitário para `JwtAuthGuard` aumentando cobertura para 100%
 - Adicionado mock específico para testes do PrismaService e PrismaModule
 - Melhorada organização da estrutura de arquivos de teste
 
-### 📊 Test Coverage
+### Test Coverage
 - **100% de cobertura** em todos os módulos
 - **89 testes unitários** passando
 - **47 testes E2E** funcionando com autenticação JWT
-
----
 
 ## [1.4.0] - 2025-08-29 - Nível 4 Completo: Autenticação JWT
 

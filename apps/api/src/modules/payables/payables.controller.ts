@@ -4,13 +4,16 @@ import { PayablesService } from './payables.service';
 import { CreatePayableRequestDto } from './dto/create-payable-request.dto';
 import { PayableResponseDto } from './dto/payable-response.dto';
 import { JwtAuthGuard } from '../../shared/auth/guards/jwt-auth.guard';
+import { BatchPayablesRequestDto } from './dto/batch-payables-request.dto';
 
 @ApiTags('payables')
 @Controller('integrations')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class PayablesController {
-  constructor(private readonly payablesService: PayablesService) {}
+  constructor(
+    private readonly payablesService: PayablesService,
+  ) {}
 
   @Post('payable')
   @ApiOperation({ summary: 'Criar um novo pagável' })
@@ -74,5 +77,13 @@ export class PayablesController {
   @ApiResponse({ status: 404, description: 'Pagável não encontrado' })
   async findOne(@Param('id') id: string): Promise<PayableResponseDto> {
     return this.payablesService.findOne(id);
+  }
+
+  @Post('payable/batch')
+  @ApiOperation({ summary: 'Enviar lote de pagáveis para processamento assíncrono' })
+  @ApiResponse({ status: 202, description: 'Lote aceito para processamento', schema: { properties: { batchId: { type: 'string' } } } })
+  async enqueueBatch(@Body() body: BatchPayablesRequestDto) {
+  const { batchId } = await this.payablesService.enqueueBatch(body.items, body.notifyTo);
+    return { batchId };
   }
 }

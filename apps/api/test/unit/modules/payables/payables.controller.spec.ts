@@ -27,6 +27,7 @@ describe('PayablesController', () => {
     create: jest.fn(),
     findAll: jest.fn(),
     findOne: jest.fn(),
+  enqueueBatch: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -147,6 +148,35 @@ describe('PayablesController', () => {
 
       expect(service.findOne).toHaveBeenCalledWith(id);
       expect(result).toEqual(mockPayableResponse);
+    });
+  });
+
+  describe('enqueueBatch', () => {
+    it('should delegate to service.enqueueBatch and return { batchId }', async () => {
+      const body = {
+        items: [
+          {
+            id: 'p1',
+            value: 100,
+            emissionDate: '2025-08-30T00:00:00.000Z',
+            assignor: {
+              id: 'a1',
+              document: '12345678900',
+              email: 'u@e.com',
+              phone: '11999999999',
+              name: 'User',
+            },
+          },
+        ],
+        notifyTo: 'ops@example.com',
+      } as any;
+
+      service.enqueueBatch.mockResolvedValue({ batchId: 'batch-123' });
+
+      const result = await controller.enqueueBatch(body);
+
+      expect(service.enqueueBatch).toHaveBeenCalledWith(body.items, body.notifyTo);
+      expect(result).toEqual({ batchId: 'batch-123' });
     });
   });
 });

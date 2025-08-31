@@ -1,4 +1,11 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: aprove-me-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
   api:
     build:
       context: ./apps/api
@@ -8,6 +15,14 @@ services:
       - NODE_ENV=production
       - LOG_LEVEL=info
       - DATABASE_URL=file:/app/prisma/data/dev.db
+      - REDIS_URL=redis://redis:6379
+      # SMTP (Mailtrap)
+      - SMTP_HOST=sandbox.smtp.mailtrap.io
+      - SMTP_PORT=587
+      - SMTP_SECURE=false
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=no-reply@example.com
     ports:
       - "3000:3000"
     volumes:
@@ -18,3 +33,4 @@ services:
 volumes:
   api_logs:
   api_db:
+  redis_data:
