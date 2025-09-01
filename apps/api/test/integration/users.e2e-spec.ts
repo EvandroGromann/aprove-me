@@ -35,7 +35,6 @@ describe('Users (e2e)', () => {
     it('should create a new user with valid data', async () => {
       const token = await getAuthToken(app);
 
-      // Usar timestamp para garantir login único
       const uniqueLogin = `newuser${Date.now()}`;
       const userData = {
         login: uniqueLogin,

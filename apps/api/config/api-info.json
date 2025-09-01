@@ -1,7 +1,7 @@
 {
   "name": "Aprove-me API",
   "description": "API para gerenciamento de recebíveis e cedentes com sistema de permissões dinâmico",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "author": "Evandro Gromann",
   "contact": {
     "name": "Evandro Gromann",
