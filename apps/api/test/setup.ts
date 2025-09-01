@@ -99,8 +99,10 @@ jest.mock('@nestjs/bull', () => {
   const InjectQueue = (name: string) => Inject(getQueueToken(name));
   const Processor = (..._args: any[]) => (target: any) => target;
   const Process = (..._args: any[]) => (target: any, key: string, descriptor: PropertyDescriptor) => descriptor;
+  // No-op decorator for queue failure events used by the consumer in tests
+  const OnQueueFailed = (..._args: any[]) => (target: any, key?: string, descriptor?: PropertyDescriptor) => descriptor ?? target;
 
-  return { BullModule, InjectQueue, Processor, Process, getQueueToken };
+  return { BullModule, InjectQueue, Processor, Process, OnQueueFailed, getQueueToken };
 });
 
 // Mock nodemailer to avoid opening SMTP connections in unit tests

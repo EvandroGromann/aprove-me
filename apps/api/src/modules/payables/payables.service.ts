@@ -46,6 +46,11 @@ export class PayablesService {
         jobId: `${batchId}:${item.id}`,
         removeOnComplete: true,
         removeOnFail: false,
+        attempts: 4,
+        backoff: {
+          type: 'exponential',
+          delay: 5_000,
+        },
       },
     }));
 

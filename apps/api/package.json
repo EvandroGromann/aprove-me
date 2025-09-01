@@ -1,6 +1,6 @@
 {
   "name": "aprove-me-api",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "API para gestão de pagáveis com sistema de permissões - Desafio Bankme",
   "main": "dist/src/main.js",
   "scripts": {

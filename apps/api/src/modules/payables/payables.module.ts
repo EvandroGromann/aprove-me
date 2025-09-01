@@ -8,7 +8,7 @@ import { PayableRepository } from './repositories/payable.repository';
 import { PrismaPayableRepository } from './repositories/prisma-payable.repository';
 import { EmailService } from '../../shared/notifications/email.service';
 import { BullModule } from '@nestjs/bull';
-import { PayablesConsumer, PAYABLE_QUEUE } from './payables.consumer';
+import { PayablesConsumer, PAYABLE_QUEUE, PAYABLE_DEAD_QUEUE } from './payables.consumer';
 
 @Module({
   imports: [
@@ -18,7 +18,10 @@ import { PayablesConsumer, PAYABLE_QUEUE } from './payables.consumer';
     BullModule.forRoot({
       redis: process.env.REDIS_URL || 'redis://localhost:6379',
     }),
-    BullModule.registerQueue({ name: PAYABLE_QUEUE as string }),
+    BullModule.registerQueue(
+      { name: PAYABLE_QUEUE as string },
+      { name: PAYABLE_DEAD_QUEUE as string },
+    ),
   ],
   controllers: [PayablesController],
   providers: [

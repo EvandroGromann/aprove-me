@@ -7,6 +7,23 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.8.0] - 2025-09-01 - Nível 8: Resiliência (Retries + Fila Morta)
+
+### Added
+- Reprocessamento automático de itens falhos com até **4 tentativas** via Bull (`attempts` e `attemptsMade`)
+- Tratamento de falhas com listener `onFailed`: ao esgotar tentativas, incrementa `failed` no tracker
+- **Fila Morta** (`payable-dead`) para itens que excederem as tentativas configuradas
+- **Notificação por email** para o time de operações quando um item vai para a Fila Morta (variável `OPS_EMAIL`)
+- Testes unitários cobrindo todos os ramos: retorno cedo quando ainda há tentativas, erro durante tratamento, `OPS_EMAIL` ausente, motivo `unknown`, e fallback `(sem id)` no corpo do email
+
+### Changed
+- Consumer de payables ajustado para registrar dead-letter e enviar email de alerta
+- Mocks do `@nestjs/bull` atualizados no setup de testes para incluir decorator `OnQueueFailed`
+
+### Notes
+- Configure `OPS_EMAIL` no ambiente para receber notificações de dead-letter
+- Mantidas notificações de conclusão de batch (nível 7) com lock para evitar duplicidade
+
 ## [1.7.0] - 2025-08-31 - Nível 7: Lotes, Observabilidade e Notificações
 
 ### Added
