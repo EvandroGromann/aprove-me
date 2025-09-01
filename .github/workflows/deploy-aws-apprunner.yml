@@ -65,6 +65,80 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          aws apprunner start-deployment --service-arn "$APP_RUNNER_SERVICE_ARN" || true
+          echo "Deployment triggered for service $APP_RUNNER_SERVICE_ARN"
+
+      - name: Output image URIs
+        run: |
+          echo "Pushed: $IMAGE_SHA_URI"
+          echo "Pushed: $IMAGE_LATEST_URI"
+name: Deploy API to AWS App Runner
+
+on:
+  push:
+    branches: [ main, feature/bankme-test ]
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/deploy-aws-apprunner.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }} # e.g. aprove-me-api
+      IMAGE_TAG: ${{ github.sha }}
+      APP_RUNNER_SERVICE_ARN: ${{ secrets.APP_RUNNER_SERVICE_ARN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Ensure ECR repository exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" >/dev/null 2>&1; then
+            aws ecr create-repository --repository-name "$ECR_REPOSITORY" >/dev/null
+            echo "Created ECR repository: $ECR_REPOSITORY"
+          else
+            echo "ECR repository exists: $ECR_REPOSITORY"
+          fi
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Compute image URIs
+        shell: bash
+        run: |
+          echo "IMAGE_SHA_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}" >> $GITHUB_ENV
+          echo "IMAGE_LATEST_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest" >> $GITHUB_ENV
+
+      - name: Build Docker image (apps/api)
+        run: |
+          docker build -f apps/api/Dockerfile -t "$IMAGE_SHA_URI" ./apps/api
+          docker tag "$IMAGE_SHA_URI" "$IMAGE_LATEST_URI"
+
+      - name: Push image to ECR (sha and latest)
+        run: |
+          docker push "$IMAGE_SHA_URI"
+          docker push "$IMAGE_LATEST_URI"
+
+      - name: Trigger App Runner deployment
+        shell: bash
+        run: |
+          set -euo pipefail
           # If your App Runner service is configured with ECR + auto deployments enabled on tag 'latest',
           # pushing :latest is enough. We also explicitly trigger a deployment to pick up the new digest.
           aws apprunner start-deployment --service-arn "$APP_RUNNER_SERVICE_ARN" || true

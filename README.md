@@ -249,7 +249,7 @@ Detalhes da orquestração:
 - Volumes: `api_logs` (logs em /app/logs) e `api_db` (SQLite em /app/prisma)
 - Migrações Prisma: aplicadas automaticamente no start (migrate deploy)
 
-## �📈 Status de Implementação
+## 📈 Status de Implementação
 
 - ✅ **Nível 1**: Validação de dados rigorosa
 - ✅ **Nível 2**: Persistência completa com Prisma
@@ -257,7 +257,10 @@ Detalhes da orquestração:
 - ✅ **Nível 4**: Autenticação JWT completa
 - ✅ **Nível 5**: Sistema de permissões com banco de dados
 - ✅ **Nível 6**: Infra e Documentação (Dockerfile, docker-compose, README)
-- 🚧 **Próximos**: Nível 7 em diante conforme especificação do desafio
+- ✅ **Nível 7**: Lotes, Observabilidade e Notificações (Bull/Redis, rastreador em Redis, e-mail ao concluir batch)
+- ✅ **Nível 8**: Resiliência (retries até 4x, Fila Morta, e-mail para operações)
+- ✅ **Nível 9**: Cloud (CI/CD para AWS App Runner via ECR com OIDC)
+- ✅ **Nível 10**: Infra as Code (Terraform para ECR, App Runner e IAM/OIDC)
 
 ## 🎯 Destaques Técnicos
 
