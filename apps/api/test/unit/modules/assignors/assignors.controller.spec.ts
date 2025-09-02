@@ -87,6 +87,27 @@ describe('AssignorsController', () => {
       expect(service.findAll).toHaveBeenCalledWith(1, 10);
       expect(result).toEqual(paginatedResult);
     });
+    
+    it('should handle null pagination parameters', async () => {
+      const paginatedResult = {
+        data: [mockAssignorResponse],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        },
+      };
+
+      service.findAll.mockResolvedValue(paginatedResult);
+
+      const result = await controller.findAll(null, null);
+
+      expect(service.findAll).toHaveBeenCalledWith(1, 10);
+      expect(result).toEqual(paginatedResult);
+    });
 
     it('should return paginated assignors with custom pagination', async () => {
       const paginatedResult = {

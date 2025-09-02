@@ -24,7 +24,6 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from './dto';
 import { JwtAuthGuard } from '../../shared/auth/guards/jwt-auth.guard';
-// logger removed from controllers per team decision
 
 @ApiTags('users')
 @ApiBearerAuth('JWT-auth')

@@ -27,6 +27,15 @@ async function bootstrap() {
     transform: true,
   }));
 
+  const corsOrigin = process.env.CORS_ORIGIN || '*';
+  app.enableCors({
+    origin: corsOrigin === '*' ? true : corsOrigin.split(',').map((s) => s.trim()),
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    maxAge: 86400,
+  });
+
   const configPath = join(__dirname, '..', 'api-info.json');
   const apiConfig = JSON.parse(readFileSync(configPath, 'utf8'));
 
@@ -90,9 +99,9 @@ async function bootstrap() {
     `,
   });
 
-  await app.listen(3000);
-  logger.log('🚀 Server running on http://localhost:3000');
-  logger.log('📚 API Documentation: http://localhost:3000/api/docs');
+  await app.listen(3000, '0.0.0.0');
+  logger.log('🚀 Server running on http://0.0.0.0:3000');
+  logger.log('📚 API Documentation: http://0.0.0.0:3000/api/docs');
   logger.log(`📋 API Info: ${apiConfig.name} v${resolvedVersion}`);
 }
 

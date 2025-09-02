@@ -14,6 +14,7 @@ RUN npm run build
 
 FROM node:20-alpine AS prod
 ENV NODE_ENV=production
+
 WORKDIR /app
 
 # Only install production dependencies
@@ -23,6 +24,7 @@ RUN npm ci --omit=dev
 # Copy built app and necessary assets
 COPY --from=builder /app/dist ./dist
 COPY prisma ./prisma
+COPY config ./config
 
 # Generate Prisma client for runtime
 RUN npx prisma generate

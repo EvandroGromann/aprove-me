@@ -6,16 +6,19 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - aprove-me-network
   api:
     build:
       context: ./apps/api
       dockerfile: Dockerfile
     container_name: aprove-me-api
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - LOG_LEVEL=info
       - DATABASE_URL=file:/app/prisma/data/dev.db
       - REDIS_URL=redis://redis:6379
+      - CORS_ORIGIN=http://localhost:5173,http://localhost:3000
       # SMTP (Mailtrap)
       - SMTP_HOST=sandbox.smtp.mailtrap.io
       - SMTP_PORT=587
@@ -28,9 +31,30 @@ services:
     volumes:
       - api_logs:/app/logs
       - api_db:/app/prisma/data
+    networks:
+      - aprove-me-network
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:3000}
+    container_name: aprove-me-web
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+    networks:
+      - aprove-me-network
     restart: unless-stopped
 
 volumes:
   api_logs:
   api_db:
   redis_data:
+
+networks:
+  aprove-me-network:
+    driver: bridge

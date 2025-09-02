@@ -7,6 +7,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed
+- Habilitado CORS global com suporte a preflight `OPTIONS` e cabeçalhos `Authorization`/`Content-Type` na API (configurável via `CORS_ORIGIN`).
+
 ## [1.8.0] - 2025-09-01 - Nível 8: Resiliência (Retries + Fila Morta)
 
 ### Added
@@ -226,7 +229,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Estrutura de testes mais limpa e maintível
 
 ### Removed
-- `jest.config.simple.js` - arquivo temporário não utilizado
 - Comentários de debug nos testes E2E
 - Código duplicado de cleanup entre describe blocks
 - Lógica complexa desnecessária de restauração de soft delete

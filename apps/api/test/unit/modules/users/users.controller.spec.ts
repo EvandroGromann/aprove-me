@@ -21,14 +21,13 @@ describe('UsersController', () => {
   };
 
   beforeEach(async () => {
-    const mockLogger = require('../../../helpers/logger.helper').createMockLogger();
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
         {
           provide: UsersService,
           useValue: mockUsersService,
-        },
+        }
       ],
     })
       .overrideGuard(JwtAuthGuard)

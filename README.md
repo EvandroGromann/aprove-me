@@ -275,8 +275,107 @@ Detalhes da orquestração:
 - **Execução sequencial de testes** evitando race conditions
 - **Arquitetura modular** facilitando manutenção e extensibilidade
 
----
-
 **Desenvolvido com 💙 por [Evandro Gromann](https://github.com/EvandroGromann)**
 
+Para histórico de mudanças, veja:
+
+- Backend (API): [apps/api/CHANGELOG.md](./apps/api/CHANGELOG.md)
+- Frontend (Web): [apps/web/CHANGELOG.md](./apps/web/CHANGELOG.md)
+
 Para mais detalhes sobre as decisões de implementação, consulte o arquivo [RACIOCINIO.md](./RACIOCINIO.md).
+
+## 🖥️ Front-end
+
+Obs.: O frontend deste monorepo está em `apps/web` (Vite + React + TypeScript + Tailwind CSS).
+
+### Como executar (dev)
+
+1) Crie o arquivo de ambiente
+
+- Copie `apps/web/.env.example` para `apps/web/.env` e ajuste:
+  - `VITE_API_URL=http://localhost:3000`
+
+2) Instale e rode o projeto web
+
+- No terminal:
+  - `cd apps/web`
+  - `npm install`
+  - `npm run dev` (servidor em `http://localhost:5174`)
+
+### Autenticação no Front
+
+- Página de Login com armazenamento de token no `localStorage`.
+- Rotas protegidas (ex.: cadastro/visualização de pagável).
+- Quando o token expira (401), o app limpa o token e redireciona ao Login com aviso de "sessão expirada", retornando à rota original após novo login.
+
+### Páginas principais já disponíveis
+
+- Login
+- Cadastrar Pagável (com validações client-side)
+- Detalhe do Pagável
+- Navbar com CTA visível apenas quando autenticado
+
+---
+
+## 📊 Status dos Níveis – Front-end
+
+Nível 1 – Cadastro
+- Crie uma interface na qual é possível cadastrar os pagáveis.
+- Previna cadastro de campos vazios ou fora das regras.
+- Exiba o pagável cadastrado em uma nova tela.
+
+Status: CONCLUÍDO ✅
+
+Nível 2 – Conectando na API
+- Conecte o Front-end na API e faça o cadastro refletir na API.
+- Faça também uma tela para cadastro do cedente.
+- Altere o cadastro inicial para que o campo assignor seja um combobox para selecionar um cedente.
+
+Status: PARCIAL ⚠️ (Cadastro de pagável integrado OK; pendente: tela de cadastro do cedente e combobox de seleção de cedente)
+
+Nível 3 – Listando
+- Sistema de listagens de pagáveis (id, value, emissionDate).
+- Para cada item, link de detalhes; opções de editar e excluir.
+- Na página de detalhes, link para exibir dados do cedente.
+- Todos os dados devem vir da API.
+
+Status: PENDENTE ⏳
+
+---
+
+## 🐳 Front-end com Docker
+
+### Variáveis necessárias
+
+- `VITE_API_URL` (ex.: `http://localhost:3000` ou a URL pública da API)
+
+Pode ser definida via arquivo `.env` na raiz (lido pelo docker compose) ou informada diretamente nos args.
+
+### Subir com docker-compose
+
+```bash
+# na raiz do repositório
+export VITE_API_URL=http://localhost:3000   # opcional, usa default se não setar
+docker compose up -d --build web api redis
+```
+
+### Acessar
+
+- Web: http://localhost:5173
+- API: http://localhost:3000
+
+Notas
+- O front é buildado com Vite e servido por Nginx dentro do container.
+- Para evitar CORS, é possível configurar proxy no Nginx para `/integrations/*` apontando para `api:3000` (ver `apps/web/nginx.conf`).
+
+Nível 4 – Autenticação
+- Implementar login e senha para acessar rotas autenticadas.
+- Armazenar o token no localStorage.
+- Caso o token expire, redirecionar para Login.
+
+Status: CONCLUÍDO ✅ (Login, token em localStorage, redirecionamento automático em 401 com aviso)
+
+Nível 5 – Testes
+- Criar testes para a aplicação Front-end.
+
+Status: PENDENTE ⏳
