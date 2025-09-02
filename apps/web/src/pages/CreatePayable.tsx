@@ -1,5 +1,5 @@
-import { FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { FormEvent, useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Assignor, CreatePayableRequest, createPayable } from '../api/client';
 import { isUuidV4, isEmail, isIsoDate, nonEmpty, maxLen, positiveNumber } from '../utils/validation';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -7,6 +7,8 @@ import { Label } from '../components/ui/Label';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { CurrencyInput } from '../components/ui/CurrencyInput';
+import { Select } from '../components/ui/Select';
+import assignorService from '../api/assignorService';
 
 function error(msg: string) { return msg; }
 
@@ -15,10 +17,29 @@ export default function CreatePayable() {
   const [value, setValue] = useState<number | ''>('');
   const [emissionDate, setEmissionDate] = useState('');
   const [assignor, setAssignor] = useState<Assignor>({ id: '', document: '', email: '', phone: '', name: '' });
+  const [assignors, setAssignors] = useState<Assignor[]>([]);
+  const [loadingAssignors, setLoadingAssignors] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchAssignors = async () => {
+      setLoadingAssignors(true);
+      try {
+        const data = await assignorService.getAll();
+        console.log("Fetched assignors:", data);
+        setAssignors(data);
+      } catch (error) {
+        console.error('Failed to fetch assignors:', error);
+      } finally {
+        setLoadingAssignors(false);
+      }
+    };
+
+    fetchAssignors();
+  }, []);
 
   function genUuidV4(): string {
     const c: any = (globalThis as any)?.crypto;
@@ -80,15 +101,27 @@ export default function CreatePayable() {
     setSubmitting(true);
     setSubmitError(null);
     try {
+      // Clean up assignor object to only include the required fields
+      const cleanAssignor = {
+        id: assignor.id,
+        document: assignor.document,
+        email: assignor.email,
+        phone: assignor.phone,
+        name: assignor.name,
+      };
+
       const payload: CreatePayableRequest = {
         id,
         value: typeof value === 'number' ? value : parseFloat(String(value)),
         emissionDate: new Date(emissionDate).toISOString(),
-        assignor,
+        assignor: cleanAssignor,
       };
+      
+      console.log("Payload being sent:", payload);
       const created = await createPayable(payload);
       navigate(`/payables/${created.id}`);
     } catch (err: any) {
+      console.error("Error creating payable:", err);
       setSubmitError(err?.message || 'Erro ao cadastrar pagável');
     } finally {
       setSubmitting(false);
@@ -146,51 +179,49 @@ export default function CreatePayable() {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="grid gap-1">
-                <div className="flex items-center justify-between gap-2">
-                  <Label htmlFor="assignorId">Cedente: ID (UUID v4)</Label>
-                  <Button
-                    type="button"
-                    size="xs"
-                    variant="ghost"
-                    onClick={() => setAssignor({ ...assignor, id: genUuidV4() })}
-                    disabled={submitting}
-                    aria-label="Gerar UUID para o ID do cedente"
-                    title="Gerar UUID"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 mr-1.5" aria-hidden="true">
-                      <path d="M4.5 12a7.5 7.5 0 0 1 12.92-5.303" />
-                      <path d="M19.5 12a7.5 7.5 0 0 1-12.92 5.303" />
-                      <path d="M16.5 3v3h-3" />
-                      <path d="M7.5 21v-3h3" />
-                    </svg>
-                    Gerar
-                  </Button>
+            <div className="grid gap-4">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="assignorSelect">Cedente</Label>
+                <Link to="/create-assignor" className="text-sm text-indigo-600 hover:text-indigo-500">
+                  + Cadastrar Novo Cedente
+                </Link>
+              </div>
+              
+              {loadingAssignors ? (
+                <div className="py-2 text-gray-500">Carregando cedentes...</div>
+              ) : (
+                <Select
+                  id="assignorSelect"
+                  disabled={submitting || loadingAssignors}
+                  value={assignor.id}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    const selectedAssignorId = e.target.value;
+                    const selectedAssignor = assignors.find(a => a.id === selectedAssignorId);
+                    if (selectedAssignor) {
+                      // Only include the required fields from the assignor object
+                      const { id, document, email, phone, name } = selectedAssignor;
+                      setAssignor({ id, document, email, phone, name });
+                    } else {
+                      setAssignor({ id: '', document: '', email: '', phone: '', name: '' });
+                    }
+                  }}
+                  options={assignors.map(a => ({ value: a.id, label: `${a.name} (${a.document})` }))}
+                  error={errors['assignor.id'] || ''}
+                  required
+                />
+              )}
+
+              {assignor.id && (
+                <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                  <h3 className="font-medium mb-2">Dados do cedente selecionado:</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div><span className="font-medium">Nome:</span> {assignor.name}</div>
+                    <div><span className="font-medium">Documento:</span> {assignor.document}</div>
+                    <div><span className="font-medium">Email:</span> {assignor.email}</div>
+                    <div><span className="font-medium">Telefone:</span> {assignor.phone}</div>
+                  </div>
                 </div>
-                <Input id="assignorId" value={assignor.id} onChange={(e) => setAssignor({ ...assignor, id: e.target.value })} disabled={submitting} />
-                {errors['assignor.id'] && <small className="text-red-600">{errors['assignor.id']}</small>}
-              </div>
-              <div className="grid gap-1">
-                <Label htmlFor="document">Documento (máx. 30)</Label>
-                <Input id="document" value={assignor.document} onChange={(e) => setAssignor({ ...assignor, document: e.target.value })} disabled={submitting} />
-                {errors['assignor.document'] && <small className="text-red-600">{errors['assignor.document']}</small>}
-              </div>
-              <div className="grid gap-1 md:col-span-2">
-                <Label htmlFor="name">Nome (máx. 140)</Label>
-                <Input id="name" value={assignor.name} onChange={(e) => setAssignor({ ...assignor, name: e.target.value })} disabled={submitting} />
-                {errors['assignor.name'] && <small className="text-red-600">{errors['assignor.name']}</small>}
-              </div>
-              <div className="grid gap-1">
-                <Label htmlFor="email">Email (máx. 140)</Label>
-                <Input id="email" value={assignor.email} onChange={(e) => setAssignor({ ...assignor, email: e.target.value })} disabled={submitting} />
-                {errors['assignor.email'] && <small className="text-red-600">{errors['assignor.email']}</small>}
-              </div>
-              <div className="grid gap-1">
-                <Label htmlFor="phone">Telefone (máx. 20)</Label>
-                <Input id="phone" value={assignor.phone} onChange={(e) => setAssignor({ ...assignor, phone: e.target.value })} disabled={submitting} />
-                {errors['assignor.phone'] && <small className="text-red-600">{errors['assignor.phone']}</small>}
-              </div>
+              )}
             </div>
 
             <div className="flex gap-3">

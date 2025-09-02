@@ -7,8 +7,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.9.0] - 2025-09-02 - Aprimoramentos e Correções de Bugs
+
+### Added
+- API endpoint para listagem paginada de cedentes via `/integrations/assignor`
+- Integração completa entre módulos de cedentes e pagáveis
+- Validação flexível para documentos (CPF/CNPJ) permitindo formatos com pontuação
+
 ### Fixed
-- Habilitado CORS global com suporte a preflight `OPTIONS` e cabeçalhos `Authorization`/`Content-Type` na API (configurável via `CORS_ORIGIN`).
+- Habilitado CORS global com suporte a preflight `OPTIONS` e cabeçalhos `Authorization`/`Content-Type` na API (configurável via `CORS_ORIGIN`)
+- Correção na validação dos campos ao criar pagáveis com cedentes existentes
+- Filtros de proteção para evitar propriedades indesejadas (createdAt, updatedAt) em requests
 
 ## [1.8.0] - 2025-09-01 - Nível 8: Resiliência (Retries + Fila Morta)
 

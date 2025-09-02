@@ -1,4 +1,4 @@
-# Aprove-me - Sistema de Gestão de Pagáveis
+# AproveMe - Sistema de Gestão de recebíveis
 
 ![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
 ![Unit Tests](https://img.shields.io/badge/unit%20tests-120%20passing-brightgreen)
@@ -7,70 +7,181 @@
 ![NestJS](https://img.shields.io/badge/NestJS-10.0-red)
 ![Prisma](https://img.shields.io/badge/Prisma-5.0-2D3748)
 
-Sistema completo de gestão de pagáveis financeiros desenvolvido com NestJS, seguindo princípios de DDD e Clean Architecture, com 100% de cobertura de testes e sistema de permissões avançado.
+Sistema completo de gestão de pagáveis financeiros composto por API robusta (NestJS) e interface moderna (React). Desenvolvido seguindo princípios de DDD e Clean Architecture.
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
-Sistema robusto para gestão de pagáveis financeiros que permite operações completas de CRUD para:
+Sistema para gestão de pagáveis financeiros que permite operações completas de CRUD para:
 - **Pagáveis (Payables)**: Representações digitais de dívidas a serem pagas/recebidas
 - **Cedentes (Assignors)**: Pessoas/empresas beneficiárias de um pagável
-- **Usuários (Users)**: Sistema de permissões e autenticação dinâmica
+- **Usuários (Users)**: Gerenciamento de contas e autenticação
 
-### ✨ Funcionalidades Implementadas
+## Estrutura do Projeto
 
-- ✅ **API REST completa** com validação rigorosa
-- ✅ **Sistema de permissões** com cadastro de usuários no banco
-- ✅ **Autenticação JWT** dinâmica baseada em banco de dados
-- ✅ **Hash de senhas** com bcrypt para segurança
-- ✅ **Documentação Swagger/OpenAPI** interativa
-- ✅ **Soft Delete** para cedentes e usuários
-- ✅ **Paginação** em consultas de listagem
-- ✅ **Relacionamentos** entre pagáveis e cedentes
-- ✅ **Testes unitários** com 100% de cobertura
-- ✅ **Testes E2E** abrangentes
-- ✅ **Arquitetura DDD** com Repository Pattern
-
-## 🏗️ Arquitetura
-
-O projeto segue princípios de **Domain-Driven Design (DDD)** e **Clean Architecture**, estruturado em módulos do NestJS:
+O projeto é organizado como um monorepo:
 
 ```
 apps/
-├── api/                 # Backend API
-│   └── src/
-│       ├── modules/     # Módulos de domínio
-│       │   ├── auth/         # Autenticação JWT
-│       │   ├── assignors/    # Domínio do Cedente  
-│       │   ├── payables/     # Domínio do Pagável
-│       │   └── users/        # Sistema de Usuários/Permissões
-│       ├── shared/      # Componentes compartilhados
-│       │   ├── auth/         # Guards e estratégias JWT
-│       │   └── database/     # Configuração do Prisma
-│       └── main.ts
-└── web/                 # Frontend (implementação futura)
+├── api/                 # Backend API (NestJS)
+└── web/                 # Frontend (React + Vite + Tailwind)
 ```
 
-## 🚀 Tecnologias Utilizadas
+## Execução com Docker
+
+O projeto completo pode ser facilmente executado com Docker:
+
+```bash
+# Na raiz do repositório
+docker compose up -d --build
+```
+
+### Serviços disponíveis:
+- **API (Backend)**: http://localhost:3000
+  - Documentação Swagger: http://localhost:3000/api/docs
+  - Usuário padrão: `aprovame/aprovame`
+  
+- **Web (Frontend)**: http://localhost:5173
+  - Conectado automaticamente à API
+
+### Variáveis de ambiente:
+- `VITE_API_URL` (opcional): Define a URL da API para o frontend
+  ```bash
+  export VITE_API_URL=http://localhost:3000   # opcional, usa default se não definida
+  ```
+
+### Comandos úteis:
+```bash
+# Ver logs em tempo real
+docker compose logs -f
+
+# Parar todos os serviços
+docker compose down
+
+# Reiniciar um serviço específico
+docker compose restart api   # ou web
+```
+
+## Status de Implementação
 
 ### Backend
+- ✅ **Nível 1**: Validação de dados rigorosa
+- ✅ **Nível 2**: Persistência completa com Prisma
+- ✅ **Nível 3**: Testes unitários com 100% cobertura
+- ✅ **Nível 4**: Autenticação JWT completa
+- ✅ **Nível 5**: Sistema de permissões com banco de dados
+- ✅ **Nível 6**: Infra e Documentação
+- ✅ **Nível 7**: Lotes, Observabilidade e Notificações
+- ✅ **Nível 8**: Resiliência (retries, Fila Morta)
+- ✅ **Nível 9**: Cloud (CI/CD para AWS App Runner)
+- ✅ **Nível 10**: Infra as Code (Terraform)
+
+### Frontend
+- ✅ **Nível 1**: Interface de cadastro de pagáveis
+- ✅ **Nível 2**: Integração com API e cadastro de cedentes
+- ✅ **Nível 4**: Autenticação (Login, token, redirect)
+- ⏳ **Nível 3**: Listagem de pagáveis
+- ⏳ **Nível 5**: Testes
+
+---
+
+# Frontend (React)
+
+## Funcionalidades
+
+- ✅ **Interface moderna** desenvolvida com React e Tailwind CSS
+- ✅ **Cadastro de cedentes** com validação de formulário
+- ✅ **Criação de pagáveis** com seleção de cedentes via dropdown
+- ✅ **Autenticação** com gestão de token JWT
+- ✅ **Validações** para formatos brasileiros (CPF/CNPJ, telefone)
+- ✅ **Navegação** intuitiva entre telas de cadastro
+
+## Tecnologias
+
+- **React** - Biblioteca para interfaces de usuário
+- **Vite** - Ferramenta de build otimizada
+- **Tailwind CSS** - Framework CSS utilitário
+- **TypeScript** - Tipagem estática
+- **React Router** - Roteamento de páginas
+- **Fetch API** - Comunicação com backend
+
+## Instalação e Execução
+
+### Pré-requisitos
+- Node.js 18+
+- npm ou yarn
+
+### Execução em desenvolvimento
+```bash
+# Clone o repositório
+git clone <repository-url>
+cd aprove-me/apps/web
+
+# Crie arquivo de ambiente
+cp .env.example .env
+# Edite o arquivo .env com a URL da API
+# VITE_API_URL=http://localhost:3000
+
+# Instale as dependências
+npm install
+
+# Execute em desenvolvimento
+npm run dev
+```
+
+O frontend estará disponível em:
+- **Aplicação**: `http://localhost:5174`
+
+### Autenticação
+
+O frontend implementa autenticação completa:
+- Login com usuário/senha
+- Armazenamento de token JWT no localStorage
+- Redirecionamento automático para login em caso de token expirado
+- Proteção de rotas para usuários não autenticados
+
+---
+
+# Backend (NestJS)
+
+## Funcionalidades
+
+- ✅ **API REST completa** com validação rigorosa
+- ✅ **Sistema de permissões** com cadastro de usuários
+- ✅ **Autenticação JWT** dinâmica baseada em banco
+- ✅ **Documentação Swagger/OpenAPI** interativa
+- ✅ **Soft Delete** para cedentes e usuários
+- ✅ **Paginação** em consultas de listagem
+- ✅ **Testes** com 100% de cobertura
+
+## Arquitetura
+
+O backend segue princípios de **Domain-Driven Design (DDD)** e **Clean Architecture**:
+
+```
+src/
+├── modules/     # Módulos de domínio
+│   ├── auth/         # Autenticação JWT
+│   ├── assignors/    # Domínio do Cedente  
+│   ├── payables/     # Domínio do Pagável
+│   └── users/        # Sistema de Usuários/Permissões
+├── shared/      # Componentes compartilhados
+│   ├── auth/         # Guards e estratégias JWT
+│   └── database/     # Configuração do Prisma
+└── main.ts
+```
+
+## Tecnologias
+
 - **NestJS** - Framework Node.js escalável
-- **TypeScript** - Linguagem principal com tipagem estática
-- **Prisma** - ORM moderno para banco de dados
-- **SQLite** - Banco de dados para desenvolvimento
-- **JWT** - Tokens de autenticação com expiração controlada
-- **Passport** - Middleware de autenticação robusto
-- **Class Validator** - Validação robusta de DTOs
-- **Swagger/OpenAPI** - Documentação interativa da API
-- **Jest** - Framework de testes com 100% de cobertura
-- **Logger** - Logs automaticos com decorators
+- **TypeScript** - Linguagem com tipagem estática
+- **Prisma** - ORM para banco de dados
+- **SQLite** - Banco de dados (desenvolvimento)
+- **JWT** - Autenticação com tokens
+- **Jest** - Framework de testes
+- **Swagger/OpenAPI** - Documentação interativa
+- **Bull/Redis** - Filas e processamento assíncrono
 
-### Testes
-- **120+ testes unitários** - Cobertura completa da lógica de negócio
-- **50+ testes E2E** - Validação de todos os endpoints
-- **Execução sequencial** - Evita race conditions
-- **Cleanup automático** - Isolamento entre testes
-
-## 📊 Modelo de Dados
+## Modelo de Dados
 
 ### Pagável (Payables)
 | Campo | Tipo | Descrição |
@@ -93,19 +204,19 @@ apps/
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
 | id | UUID | Identificação única |
-| login | String | Login único para autenticação |
-| password | String | Senha hasheada com bcrypt |
+| login | String | Login único |
+| password | String | Senha hasheada |
 | createdAt | Date | Data de criação |
 | updatedAt | Date | Data de atualização |
 | deletedAt | Date? | Soft delete |
 
-## 🛠️ Instalação e Execução
+## Instalação e Execução
 
 ### Pré-requisitos
 - Node.js 18+
 - npm ou yarn
 
-### Backend
+### Execução em desenvolvimento
 ```bash
 # Clone o repositório
 git clone <repository-url>
@@ -123,90 +234,13 @@ npm run db:seed
 
 # Execute em desenvolvimento
 npm run dev
-
-# Execute os testes
-npm run test:all
 ```
 
 A API estará disponível em:
 - **Aplicação**: `http://localhost:3000`
 - **Documentação Swagger**: `http://localhost:3000/api/docs`
 
-### 🔐 Como usar a autenticação
-
-O sistema agora utiliza **autenticação dinâmica baseada em banco de dados**.
-
-1. **Usuário padrão (criado automaticamente):**
-   - Login: `aprovame`
-   - Senha: `aprovame`
-
-2. **Obter token JWT:**
-```bash
-curl -X POST http://localhost:3000/integrations/auth \
-  -H "Content-Type: application/json" \
-  -d '{"login":"aprovame","password":"aprovame"}'
-```
-
-3. **Criar novos usuários (requer autenticação):**
-```bash
-curl -X POST http://localhost:3000/users \ 
-  -H "Authorization: Bearer SEU_TOKEN_JWT" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "login": "novouser",
-    "password": "senha123"
-  }'
-```
-
-4. **Usar o token nas requisições:**
-```bash
-curl -X GET http://localhost:3000/integrations/assignor \
-  -H "Authorization: Bearer SEU_TOKEN_JWT_AQUI"
-```
-
-5. **No Swagger UI:**
-   - Clique no botão "Authorize" 🔓
-   - Insira o token obtido no login
-   - Todos os endpoints ficarão autenticados automaticamente
-
-## 📡 Endpoints da API
-
-### 🔐 Autenticação
-- `POST /integrations/auth` - Realizar login e obter token JWT
-
-> **Sistema de Permissões:**
-> - Autenticação dinâmica baseada em banco de dados
-> - Usuário padrão: `aprovame/aprovame`
-> - Token expira em: **1 minuto**
-> - Senhas hasheadas com bcrypt
-
-### 👥 Usuários (Users) 🔒
-*Todos os endpoints requerem autenticação JWT*
-
-- `POST /users` - Criar novo usuário
-- `GET /users` - Listar todos os usuários
-- `GET /users/:id` - Buscar usuário específico
-- `PATCH /users/:id` - Atualizar usuário
-- `DELETE /users/:id` - Soft delete de usuário
-
-### Pagáveis (Payables) 🔒
-*Todos os endpoints requerem autenticação JWT*
-
-- `POST /integrations/payable` - Criar pagável com cedente
-- `GET /integrations/payable` - Listar pagáveis (paginado)
-- `GET /integrations/payable/:id` - Buscar pagável específico
-
-### Cedentes (Assignors) 🔒
-*Todos os endpoints requerem autenticação JWT*
-
-- `POST /integrations/assignor` - Criar cedente
-- `GET /integrations/assignor` - Listar cedentes (paginado)
-- `GET /integrations/assignor/:id` - Buscar cedente específico
-- `PATCH /integrations/assignor/:id` - Atualizar cedente
-- `DELETE /integrations/assignor/:id` - Soft delete de cedente
-- `POST /integrations/assignor/:id/restore` - Restaurar cedente deletado
-
-## 🧪 Testes e Qualidade
+### Testes
 
 ```bash
 # Executar todos os testes
@@ -217,65 +251,40 @@ npm run test:cov
 
 # Testes E2E
 npm run test:e2e
-
-# Verificar erros de lint
-npm run lint
 ```
 
-### Métricas de Qualidade
-- **100% de cobertura** de código nos testes unitários
-- **50+ testes E2E** cobrindo todos os cenários de uso
-- **120+ testes unitários** validando a lógica de negócio
-- **Zero race conditions** com execução sequencial
-1
-## � Docker e Execução com Compose
+## Endpoints da API
 
-Executar a API em ambiente conteinerizado.
+### Autenticação
+- `POST /integrations/auth` - Realizar login e obter token JWT
 
-Pré-requisitos:
-- Docker Desktop 4+
+> **Sistema de Permissões:**
+> - Usuário padrão: `aprovame/aprovame`
+> - Token expira em: **1 minuto**
 
-Comandos principais:
-- Subir em modo produção: docker compose up -d --build
-- Ver logs: docker compose logs -f api
-- Parar: docker compose down
-- Parar e limpar volumes (DB/logs): docker compose down -v
+### 👥 Usuários (Users) 🔒
+- `POST /users` - Criar novo usuário
+- `GET /users` - Listar usuários
+- `GET /users/:id` - Buscar usuário
+- `PATCH /users/:id` - Atualizar usuário
+- `DELETE /users/:id` - Soft delete de usuário
 
-Detalhes da orquestração:
-- Build usando `apps/api/Dockerfile` (multi-stage, deps → build → prod)
-- Porta exposta: 3000 (http://localhost:3000)
-- Documentação Swagger: http://localhost:3000/api/docs
-- Variáveis padrão: NODE_ENV=production, LOG_LEVEL=info, DATABASE_URL=file:/app/prisma/dev.db
-- Volumes: `api_logs` (logs em /app/logs) e `api_db` (SQLite em /app/prisma)
-- Migrações Prisma: aplicadas automaticamente no start (migrate deploy)
+### Pagáveis (Payables) 🔒
+- `POST /integrations/payable` - Criar pagável
+- `GET /integrations/payable` - Listar pagáveis (paginado)
+- `GET /integrations/payable/:id` - Buscar pagável
 
-## 📈 Status de Implementação
+### Cedentes (Assignors) 🔒
+- `POST /integrations/assignor` - Criar cedente
+- `GET /integrations/assignor` - Listar cedentes (paginado)
+- `GET /integrations/assignor/:id` - Buscar cedente
+- `PATCH /integrations/assignor/:id` - Atualizar cedente
+- `DELETE /integrations/assignor/:id` - Soft delete de cedente
+- `POST /integrations/assignor/:id/restore` - Restaurar cedente
 
-- ✅ **Nível 1**: Validação de dados rigorosa
-- ✅ **Nível 2**: Persistência completa com Prisma
-- ✅ **Nível 3**: Testes unitários com 100% cobertura
-- ✅ **Nível 4**: Autenticação JWT completa
-- ✅ **Nível 5**: Sistema de permissões com banco de dados
-- ✅ **Nível 6**: Infra e Documentação (Dockerfile, docker-compose, README)
-- ✅ **Nível 7**: Lotes, Observabilidade e Notificações (Bull/Redis, rastreador em Redis, e-mail ao concluir batch)
-- ✅ **Nível 8**: Resiliência (retries até 4x, Fila Morta, e-mail para operações)
-- ✅ **Nível 9**: Cloud (CI/CD para AWS App Runner via ECR com OIDC)
-- ✅ **Nível 10**: Infra as Code (Terraform para ECR, App Runner e IAM/OIDC)
+---
 
-## 🎯 Destaques Técnicos
-
-- **Domain-Driven Design** com separação clara de responsabilidades
-- **Repository Pattern** para abstração de dados
-- **Sistema de Permissões** dinâmico baseado em banco de dados
-- **Hash de senhas** com bcrypt para máxima segurança
-- **100% Test Coverage** garantindo qualidade e confiabilidade
-- **Soft Delete** preservando integridade histórica
-- **Validação robusta** em todos os pontos de entrada
-- **Documentação OpenAPI** para facilitar integração
-- **Execução sequencial de testes** evitando race conditions
-- **Arquitetura modular** facilitando manutenção e extensibilidade
-
-**Desenvolvido com 💙 por [Evandro Gromann](https://github.com/EvandroGromann)**
+## Documentação Adicional
 
 Para histórico de mudanças, veja:
 
@@ -284,98 +293,4 @@ Para histórico de mudanças, veja:
 
 Para mais detalhes sobre as decisões de implementação, consulte o arquivo [RACIOCINIO.md](./RACIOCINIO.md).
 
-## 🖥️ Front-end
-
-Obs.: O frontend deste monorepo está em `apps/web` (Vite + React + TypeScript + Tailwind CSS).
-
-### Como executar (dev)
-
-1) Crie o arquivo de ambiente
-
-- Copie `apps/web/.env.example` para `apps/web/.env` e ajuste:
-  - `VITE_API_URL=http://localhost:3000`
-
-2) Instale e rode o projeto web
-
-- No terminal:
-  - `cd apps/web`
-  - `npm install`
-  - `npm run dev` (servidor em `http://localhost:5174`)
-
-### Autenticação no Front
-
-- Página de Login com armazenamento de token no `localStorage`.
-- Rotas protegidas (ex.: cadastro/visualização de pagável).
-- Quando o token expira (401), o app limpa o token e redireciona ao Login com aviso de "sessão expirada", retornando à rota original após novo login.
-
-### Páginas principais já disponíveis
-
-- Login
-- Cadastrar Pagável (com validações client-side)
-- Detalhe do Pagável
-- Navbar com CTA visível apenas quando autenticado
-
----
-
-## 📊 Status dos Níveis – Front-end
-
-Nível 1 – Cadastro
-- Crie uma interface na qual é possível cadastrar os pagáveis.
-- Previna cadastro de campos vazios ou fora das regras.
-- Exiba o pagável cadastrado em uma nova tela.
-
-Status: CONCLUÍDO ✅
-
-Nível 2 – Conectando na API
-- Conecte o Front-end na API e faça o cadastro refletir na API.
-- Faça também uma tela para cadastro do cedente.
-- Altere o cadastro inicial para que o campo assignor seja um combobox para selecionar um cedente.
-
-Status: PARCIAL ⚠️ (Cadastro de pagável integrado OK; pendente: tela de cadastro do cedente e combobox de seleção de cedente)
-
-Nível 3 – Listando
-- Sistema de listagens de pagáveis (id, value, emissionDate).
-- Para cada item, link de detalhes; opções de editar e excluir.
-- Na página de detalhes, link para exibir dados do cedente.
-- Todos os dados devem vir da API.
-
-Status: PENDENTE ⏳
-
----
-
-## 🐳 Front-end com Docker
-
-### Variáveis necessárias
-
-- `VITE_API_URL` (ex.: `http://localhost:3000` ou a URL pública da API)
-
-Pode ser definida via arquivo `.env` na raiz (lido pelo docker compose) ou informada diretamente nos args.
-
-### Subir com docker-compose
-
-```bash
-# na raiz do repositório
-export VITE_API_URL=http://localhost:3000   # opcional, usa default se não setar
-docker compose up -d --build web api redis
-```
-
-### Acessar
-
-- Web: http://localhost:5173
-- API: http://localhost:3000
-
-Notas
-- O front é buildado com Vite e servido por Nginx dentro do container.
-- Para evitar CORS, é possível configurar proxy no Nginx para `/integrations/*` apontando para `api:3000` (ver `apps/web/nginx.conf`).
-
-Nível 4 – Autenticação
-- Implementar login e senha para acessar rotas autenticadas.
-- Armazenar o token no localStorage.
-- Caso o token expire, redirecionar para Login.
-
-Status: CONCLUÍDO ✅ (Login, token em localStorage, redirecionamento automático em 401 com aviso)
-
-Nível 5 – Testes
-- Criar testes para a aplicação Front-end.
-
-Status: PENDENTE ⏳
+**Desenvolvido com 💙 por [Evandro Gromann](https://github.com/EvandroGromann)**

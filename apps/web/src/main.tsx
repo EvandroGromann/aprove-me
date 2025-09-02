@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import CreatePayable from './pages/CreatePayable';
 import PayableDetail from './pages/PayableDetail';
 import ProtectedRoute from './pages/ProtectedRoute';
+import { CreateAssignor } from './pages/CreateAssignor';
 
 const root = createRoot(document.getElementById('root')!);
 
@@ -19,6 +20,8 @@ root.render(
           <Route path="login" element={<Login />} />
           <Route path="payables/new" element={<ProtectedRoute><CreatePayable /></ProtectedRoute>} />
           <Route path="payables/:id" element={<ProtectedRoute><PayableDetail /></ProtectedRoute>} />
+          <Route path="create-assignor" element={<ProtectedRoute><CreateAssignor /></ProtectedRoute>} />
+          <Route path="create-payable" element={<ProtectedRoute><CreatePayable /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>
