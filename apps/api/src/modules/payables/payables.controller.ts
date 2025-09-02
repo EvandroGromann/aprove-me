@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Param, Body, Query, UseGuards, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { PayablesService } from './payables.service';
 import { CreatePayableRequestDto } from './dto/create-payable-request.dto';
 import { PayableResponseDto } from './dto/payable-response.dto';
 import { JwtAuthGuard } from '../../shared/auth/guards/jwt-auth.guard';
 import { BatchPayablesRequestDto } from './dto/batch-payables-request.dto';
+import { UpdatePayableRequestDto } from './dto/update-payable-request.dto';
 
 @ApiTags('payables')
 @Controller('integrations')
@@ -85,5 +86,29 @@ export class PayablesController {
   async enqueueBatch(@Body() body: BatchPayablesRequestDto) {
   const { batchId } = await this.payablesService.enqueueBatch(body.items, body.notifyTo);
     return { batchId };
+  }
+
+  @Patch('payable/:id')
+  @ApiOperation({ summary: 'Atualizar pagável' })
+  @ApiParam({ name: 'id', description: 'UUID do pagável' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Pagável atualizado com sucesso',
+    type: PayableResponseDto 
+  })
+  @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  @ApiResponse({ status: 404, description: 'Pagável não encontrado' })
+  async update(@Param('id') id: string, @Body() updatePayableDto: UpdatePayableRequestDto): Promise<PayableResponseDto> {
+    return this.payablesService.update(id, updatePayableDto);
+  }
+  
+  @Delete('payable/:id')
+  @ApiOperation({ summary: 'Excluir pagável' })
+  @ApiParam({ name: 'id', description: 'UUID do pagável' })
+  @ApiResponse({ status: 204, description: 'Pagável excluído com sucesso' })
+  @ApiResponse({ status: 404, description: 'Pagável não encontrado' })
+  @HttpCode(204)
+  async remove(@Param('id') id: string): Promise<void> {
+    return this.payablesService.remove(id);
   }
 }

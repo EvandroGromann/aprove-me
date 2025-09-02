@@ -42,5 +42,5 @@ export function Navbar({ right, loggedIn }: { right?: React.ReactNode; loggedIn?
 }
 
 export function Container({ children }: PropsWithChildren) {
-  return <main className="max-w-6xl mx-auto px-4 py-6">{children}</main>;
+  return <main className="w-[90%] max-w-7xl mx-auto px-2 py-6">{children}</main>;
 }

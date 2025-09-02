@@ -7,8 +7,29 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [1.10.0] - 2025-09-02 - Melhorias na API e Correção de Testes
+
+### Added
+- Implementação completa dos métodos `update` e `remove` em `PayablesController`
+- Novo DTO `UpdatePayableRequestDto` utilizando `PartialType` para validações em atualizações parciais
+- Testes unitários completos para métodos `update` e `delete` em `PrismaPayableRepository`
+
 ### Fixed
-- Habilitado CORS global com suporte a preflight `OPTIONS` e cabeçalhos `Authorization`/`Content-Type` na API (configurável via `CORS_ORIGIN`).
+- Resposta HTTP 204 corrigida para o endpoint DELETE de pagáveis utilizando `@HttpCode(204)`
+- Validação de valores negativos em atualizações parciais de pagáveis
+- Cobertura de testes para os métodos `update` e `remove` no service e repository
+
+## [1.9.0] - 2025-09-02 - Aprimoramentos e Correções de Bugs
+
+### Added
+- API endpoint para listagem paginada de cedentes via `/integrations/assignor`
+- Integração completa entre módulos de cedentes e pagáveis
+- Validação flexível para documentos (CPF/CNPJ) permitindo formatos com pontuação
+
+### Fixed
+- Habilitado CORS global com suporte a preflight `OPTIONS` e cabeçalhos `Authorization`/`Content-Type` na API (configurável via `CORS_ORIGIN`)
+- Correção na validação dos campos ao criar pagáveis com cedentes existentes
+- Filtros de proteção para evitar propriedades indesejadas (createdAt, updatedAt) em requests
 
 ## [1.8.0] - 2025-09-01 - Nível 8: Resiliência (Retries + Fila Morta)
 

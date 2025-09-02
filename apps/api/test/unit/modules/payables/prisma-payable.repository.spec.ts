@@ -34,6 +34,8 @@ describe('PrismaPayableRepository', () => {
       findUnique: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
       count: jest.fn(),
     },
   };
@@ -147,6 +149,74 @@ describe('PrismaPayableRepository', () => {
 
       expect(mockPrismaService.payable.create).toHaveBeenCalledWith({
         data: createData,
+        include: {
+          assignor: true,
+        },
+      });
+      expect(result).toEqual(mockPayable);
+    });
+  });
+
+  describe('update', () => {
+    it('should update payable with specified data', async () => {
+      const updateData = {
+        value: 2000.50,
+        emissionDate: new Date('2025-01-15T00:00:00Z'),
+      };
+      
+      const updatedPayable = {
+        ...mockPayable,
+        value: 2000.50,
+        emissionDate: new Date('2025-01-15T00:00:00Z'),
+      };
+      
+      mockPrismaService.payable.update.mockResolvedValue(updatedPayable);
+
+      const result = await repository.update(mockPayable.id, updateData);
+
+      expect(mockPrismaService.payable.update).toHaveBeenCalledWith({
+        where: { id: mockPayable.id },
+        data: updateData,
+        include: {
+          assignor: true,
+        },
+      });
+      expect(result).toEqual(updatedPayable);
+    });
+
+    it('should update assignor reference', async () => {
+      const updateData = {
+        assignorId: 'new-assignor-id',
+      };
+      
+      const updatedPayable = {
+        ...mockPayable,
+        assignorId: 'new-assignor-id',
+      };
+      
+      mockPrismaService.payable.update.mockResolvedValue(updatedPayable);
+
+      const result = await repository.update(mockPayable.id, updateData);
+
+      expect(mockPrismaService.payable.update).toHaveBeenCalledWith({
+        where: { id: mockPayable.id },
+        data: updateData,
+        include: {
+          assignor: true,
+        },
+      });
+      expect(result).toEqual(updatedPayable);
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete payable by id', async () => {
+      mockPrismaService.payable.delete.mockResolvedValue(mockPayable);
+
+      const result = await repository.delete(mockPayable.id);
+
+      expect(mockPrismaService.payable.delete).toHaveBeenCalledWith({
+        where: { id: mockPayable.id },
         include: {
           assignor: true,
         },

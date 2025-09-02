@@ -27,7 +27,9 @@ describe('PayablesController', () => {
     create: jest.fn(),
     findAll: jest.fn(),
     findOne: jest.fn(),
-  enqueueBatch: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
+    enqueueBatch: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -177,6 +179,41 @@ describe('PayablesController', () => {
 
       expect(service.enqueueBatch).toHaveBeenCalledWith(body.items, body.notifyTo);
       expect(result).toEqual({ batchId: 'batch-123' });
+    });
+  });
+
+  describe('update', () => {
+    it('should update a payable and return the updated entity', async () => {
+      const id = '550e8400-e29b-41d4-a716-446655440001';
+      const updateDto = {
+        value: 2000,
+        emissionDate: '2025-01-15T00:00:00.000Z',
+      };
+      
+      const updatedPayable = {
+        ...mockPayableResponse,
+        value: 2000,
+        emissionDate: new Date('2025-01-15T00:00:00.000Z'),
+      };
+      
+      service.update.mockResolvedValue(updatedPayable);
+
+      const result = await controller.update(id, updateDto);
+
+      expect(service.update).toHaveBeenCalledWith(id, updateDto);
+      expect(result).toEqual(updatedPayable);
+    });
+  });
+
+  describe('remove', () => {
+    it('should call service.remove with the correct id', async () => {
+      const id = '550e8400-e29b-41d4-a716-446655440001';
+      
+      service.remove.mockResolvedValue(undefined);
+
+      await controller.remove(id);
+
+      expect(service.remove).toHaveBeenCalledWith(id);
     });
   });
 });

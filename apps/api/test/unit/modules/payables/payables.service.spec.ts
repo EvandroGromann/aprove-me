@@ -50,6 +50,8 @@ describe('PayablesService', () => {
     findAllPaginated: jest.fn(),
     count: jest.fn(),
     create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
   };
 
   const mockAssignorRepository = {
@@ -309,6 +311,111 @@ describe('PayablesService', () => {
 
       await expect(service.findOne('invalid-id')).rejects.toThrow(NotFoundException);
       expect(payableRepository.findById).toHaveBeenCalledWith('invalid-id');
+    });
+  });
+
+  describe('update', () => {
+    const updateDto = {
+      value: 2000.50,
+      emissionDate: '2025-01-15T00:00:00.000Z',
+    };
+
+    const updatedPayable = {
+      ...mockPayable,
+      value: 2000.50,
+      emissionDate: new Date('2025-01-15T00:00:00Z'),
+    };
+
+    it('should update payable with valid data', async () => {
+      payableRepository.findById.mockResolvedValue(mockPayable);
+      payableRepository.update.mockResolvedValue(updatedPayable);
+
+      const result = await service.update(mockPayable.id, updateDto);
+
+      expect(payableRepository.findById).toHaveBeenCalledWith(mockPayable.id);
+      expect(payableRepository.update).toHaveBeenCalledWith(mockPayable.id, {
+        value: updateDto.value,
+        emissionDate: new Date(updateDto.emissionDate),
+      });
+      expect(result).toEqual({
+        id: updatedPayable.id,
+        value: updatedPayable.value,
+        emissionDate: updatedPayable.emissionDate,
+        assignor: {
+          id: mockAssignor.id,
+          document: mockAssignor.document,
+          email: mockAssignor.email,
+          phone: mockAssignor.phone,
+          name: mockAssignor.name,
+        },
+        createdAt: updatedPayable.createdAt,
+        updatedAt: updatedPayable.updatedAt,
+      });
+    });
+
+    it('should update assignor data when included in update', async () => {
+      const updateWithAssignor = {
+        assignor: {
+          id: mockAssignor.id,
+          name: 'Updated User',
+          document: '98765432100',
+          email: 'updated@example.com',
+          phone: '11987654321',
+        },
+      };
+
+      const updatedAssignor = {
+        ...mockAssignor,
+        name: 'Updated User',
+        document: '98765432100',
+        email: 'updated@example.com',
+        phone: '11987654321',
+      };
+
+      const payableWithUpdatedAssignor = {
+        ...mockPayable,
+        assignor: updatedAssignor,
+      };
+
+      payableRepository.findById.mockResolvedValue(mockPayable);
+      assignorRepository.upsert.mockResolvedValue(updatedAssignor);
+      payableRepository.update.mockResolvedValue(payableWithUpdatedAssignor);
+
+      const result = await service.update(mockPayable.id, updateWithAssignor);
+
+      expect(assignorRepository.upsert).toHaveBeenCalledWith(updateWithAssignor.assignor);
+      expect(payableRepository.update).toHaveBeenCalledWith(mockPayable.id, {
+        assignorId: mockAssignor.id,
+      });
+      expect(result.assignor.name).toBe('Updated User');
+    });
+
+    it('should throw NotFoundException when payable not found', async () => {
+      payableRepository.findById.mockResolvedValue(null);
+
+      await expect(service.update('invalid-id', updateDto)).rejects.toThrow(NotFoundException);
+      expect(payableRepository.findById).toHaveBeenCalledWith('invalid-id');
+      expect(payableRepository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('remove', () => {
+    it('should delete payable when it exists', async () => {
+      payableRepository.findById.mockResolvedValue(mockPayable);
+      payableRepository.delete.mockResolvedValue(undefined);
+
+      await service.remove(mockPayable.id);
+
+      expect(payableRepository.findById).toHaveBeenCalledWith(mockPayable.id);
+      expect(payableRepository.delete).toHaveBeenCalledWith(mockPayable.id);
+    });
+
+    it('should throw NotFoundException when payable not found', async () => {
+      payableRepository.findById.mockResolvedValue(null);
+
+      await expect(service.remove('invalid-id')).rejects.toThrow(NotFoundException);
+      expect(payableRepository.findById).toHaveBeenCalledWith('invalid-id');
+      expect(payableRepository.delete).not.toHaveBeenCalled();
     });
   });
 });

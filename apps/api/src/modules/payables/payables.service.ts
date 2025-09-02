@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { RequestContextService } from '../../shared/context/request-context.service';
+import { UpdatePayableRequestDto } from './dto/update-payable-request.dto';
 
 @Injectable()
 export class PayablesService {
@@ -129,5 +130,58 @@ export class PayablesService {
     }
 
     return this.mapToResponseDto(payable);
+  }
+
+  @Log()
+  async update(id: string, updatePayableDto: UpdatePayableRequestDto): Promise<PayableResponseDto> {
+    // Verificar se o pagável existe
+    const existingPayable = await this.payableRepository.findById(id);
+    if (!existingPayable) {
+      throw new NotFoundException('Pagável não encontrado');
+    }
+
+    // Preparar dados para atualização
+    const updateData: any = {};
+
+    if (updatePayableDto.value !== undefined) {
+      updateData.value = updatePayableDto.value;
+    }
+
+    if (updatePayableDto.emissionDate !== undefined) {
+      updateData.emissionDate = new Date(updatePayableDto.emissionDate);
+    }
+
+    // Se houver atualização do cedente
+    if (updatePayableDto.assignor !== undefined) {
+      const assignorData = updatePayableDto.assignor;
+      const assignorId = assignorData.id;
+      
+      // Upsert do cedente para garantir que existe
+      await this.assignorRepository.upsert({
+        id: assignorData.id,
+        document: assignorData.document,
+        email: assignorData.email,
+        phone: assignorData.phone,
+        name: assignorData.name,
+      });
+      
+      updateData.assignorId = assignorId;
+    }
+
+    // Atualizar o pagável
+    const updatedPayable = await this.payableRepository.update(id, updateData);
+    return this.mapToResponseDto(updatedPayable);
+  }
+  
+  @Log()
+  async remove(id: string): Promise<void> {
+    // Verificar se o pagável existe
+    const existingPayable = await this.payableRepository.findById(id);
+    if (!existingPayable) {
+      throw new NotFoundException('Pagável não encontrado');
+    }
+
+    // Excluir o pagável
+    await this.payableRepository.delete(id);
   }
 }

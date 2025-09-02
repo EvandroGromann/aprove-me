@@ -280,6 +280,111 @@ describe('PayablesController (e2e)', () => {
     });
   });
 
+  describe('/integrations/payable/:id (PATCH)', () => {
+    beforeEach(async () => {
+      await prisma.assignor.create({ data: testAssignor });
+      
+      await prisma.payable.create({
+        data: {
+          id: testPayable.id,
+          value: testPayable.value,
+          emissionDate: new Date(testPayable.emissionDate),
+          assignorId: testAssignor.id,
+        },
+      });
+    });
+
+    it('should update payable with valid data', () => {
+      const updateData = {
+        value: 2000.50,
+        emissionDate: '2024-10-15T00:00:00.000Z',
+      };
+
+      return authenticatedRequest(app, authToken)
+        .patch(`/integrations/payable/${testPayable.id}`)
+        .send(updateData)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toMatchObject({
+            id: testPayable.id,
+            value: updateData.value,
+            emissionDate: new Date(updateData.emissionDate).toISOString(),
+          });
+        });
+    });
+
+    it('should update payable assignor', () => {
+      const updateData = {
+        assignor: {
+          id: testAssignor.id, 
+          name: 'Updated Name',
+          email: 'new-email@example.com',
+          document: testAssignor.document,
+          phone: testAssignor.phone,
+        }
+      };
+
+      return authenticatedRequest(app, authToken)
+        .patch(`/integrations/payable/${testPayable.id}`)
+        .send(updateData)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.assignor).toMatchObject({
+            id: testAssignor.id,
+            name: 'Updated Name',
+            email: 'new-email@example.com',
+          });
+        });
+    });
+
+    it('should return 404 for non-existent payable', () => {
+      return authenticatedRequest(app, authToken)
+        .patch('/integrations/payable/550e8400-e29b-41d4-a716-446655440999')
+        .send({ value: 1000 })
+        .expect(404);
+    });
+
+    it('should return 400 for invalid payable data', () => {
+      return authenticatedRequest(app, authToken)
+        .patch(`/integrations/payable/${testPayable.id}`)
+        .send({ value: -100 })
+        .expect(400);
+    });
+  });
+
+  describe('/integrations/payable/:id (DELETE)', () => {
+    beforeEach(async () => {
+      await prisma.assignor.create({ data: testAssignor });
+      
+      await prisma.payable.create({
+        data: {
+          id: testPayable.id,
+          value: testPayable.value,
+          emissionDate: new Date(testPayable.emissionDate),
+          assignorId: testAssignor.id,
+        },
+      });
+    });
+
+    it('should delete an existing payable', async () => {
+      await authenticatedRequest(app, authToken)
+        .delete(`/integrations/payable/${testPayable.id}`)
+        .expect(204);
+
+      // Verify payable was deleted
+      const payable = await prisma.payable.findUnique({
+        where: { id: testPayable.id },
+      });
+      expect(payable).toBeNull();
+    });
+
+    it('should return 404 for non-existent payable', () => {
+      return authenticatedRequest(app, authToken)
+        .delete('/integrations/payable/550e8400-e29b-41d4-a716-446655440999')
+        .expect(404);
+    });
+  });
+
   describe('Data integrity tests', () => {
     it('should maintain referential integrity between payables and assignors', async () => {
       const response = await authenticatedRequest(app, authToken)

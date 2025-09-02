@@ -52,4 +52,23 @@ export class PrismaPayableRepository implements PayableRepository {
       },
     });
   }
+
+  async update(id: string, data: Partial<Omit<PayableEntity, 'id' | 'createdAt' | 'updatedAt' | 'assignor'>>): Promise<PayableEntity> {
+    return this.prisma.payable.update({
+      where: { id },
+      data,
+      include: {
+        assignor: true,
+      },
+    });
+  }
+  
+  async delete(id: string): Promise<PayableEntity> {
+    return this.prisma.payable.delete({
+      where: { id },
+      include: {
+        assignor: true,
+      },
+    });
+  }
 }

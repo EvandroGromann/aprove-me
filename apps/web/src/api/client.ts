@@ -162,11 +162,16 @@ async function request<T = any>(path: string, init: RequestInit = {}): Promise<T
 }
 
 export async function createPayable(payload: CreatePayableRequest): Promise<PayableResponse> {
-  return await request<PayableResponse>(`/integrations/payable`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  try {
+    return await request<PayableResponse>(`/integrations/payable`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    console.error('Failed to create payable:', error);
+    throw error;
+  }
 }
 
 export async function getPayable(id: string): Promise<PayableResponse> {
